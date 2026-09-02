@@ -7,12 +7,12 @@ const UNIT_TOKEN_SCENE := preload("res://scenes/unit_token.tscn")
 ## battle_ui.tscn's DiceRollerContainer - it's sized/positioned to match
 ## the actual green circle in ui/DiceTray.png, not a round number).
 @export var spawn_area: Vector2 = Vector2(95, 90)
-const SPAWN_SPREAD := 14.0
+const SPAWN_SPREAD := 8.0
 const CLASH_DICE_COUNT := 3
 
 ## Dice were built for a full-size scene - shrink them to fit inside the
 ## small felt-bowl viewport. Tune this until they look right in the felt.
-const DICE_SCALE := 0.28
+const DICE_SCALE := 0.15
 
 const MARCH_DURATION := 3.0  # seconds for a token to cross the whole track
 const MAX_UNITS_PER_DRAFT := 8  # keeps a single draft's march readable; tune freely
@@ -93,7 +93,7 @@ func _ready() -> void:
 ## them back. Box the roll area in with invisible walls so flung dice
 ## bounce back into view instead of settling somewhere outside the tray.
 func _build_tray_walls() -> void:
-	var half_extents := Vector2(100, 95)
+	var half_extents := Vector2(70, 65)
 	var thickness := 20.0
 	_add_wall(spawn_area + Vector2(0, -half_extents.y), Vector2(half_extents.x * 2, thickness))
 	_add_wall(spawn_area + Vector2(0, half_extents.y), Vector2(half_extents.x * 2, thickness))
