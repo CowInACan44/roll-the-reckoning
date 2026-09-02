@@ -40,6 +40,7 @@ grow_vertical = 0
 texture = ExtResource("1_lgetq")
 
 [node name="UIRoot" type="Control" parent="." unique_id=889494878]
+groups=PackedStringArray("battle_hud")
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -49,13 +50,14 @@ grow_vertical = 2
 
 [node name="DiceRollerContainer" type="SubViewportContainer" parent="UIRoot" unique_id=1256103770]
 layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-grow_horizontal = 2
-grow_vertical = 2
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = -528.0
+offset_right = 528.0
+offset_bottom = -16.0
+grow_vertical = 0
 mouse_filter = 2
 stretch = true
 
@@ -63,7 +65,7 @@ stretch = true
 transparent_bg = true
 handle_input_locally = false
 canvas_item_default_texture_filter = 0
-size = Vector2i(2, 2)
+size = Vector2i(512, 512)
 render_target_update_mode = 4
 
 [node name="DiceRoller" type="Node2D" parent="UIRoot/DiceRollerContainer/DiceRollerViewport" unique_id=348076225]
@@ -75,14 +77,8 @@ common_icons = Array[Texture2D]([ExtResource("9_k0kd0"), ExtResource("10_ms1mg")
 [node name="DiceCountSelector" parent="UIRoot/DiceRollerContainer/DiceRollerViewport/DiceRoller" unique_id=1754363337 instance=ExtResource("2_lgetq")]
 
 [node name="MarchTrack" type="Path2D" parent="UIRoot" unique_id=1051615158]
+groups=PackedStringArray("march_track")
 curve = SubResource("Curve2D_p5qam")
-
-[node name="PathFollow2D" type="PathFollow2D" parent="UIRoot/MarchTrack" unique_id=726076869]
-position = Vector2(681.2095, 618.9202)
-rotation = 0.10985012
-progress = 458.82764
-
-[node name="UnitToken" parent="UIRoot/MarchTrack/PathFollow2D" unique_id=78073890 instance=ExtResource("4_2a1ha")]
 
 [node name="RollButton" type="Button" parent="UIRoot" unique_id=875246777]
 layout_mode = 1
@@ -91,8 +87,10 @@ anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -4.0
-offset_top = -12.0
-offset_right = 54.0
+offset_left = -40.0
+offset_top = -50.0
+offset_right = 40.0
+offset_bottom = -14.0
 grow_horizontal = 2
 grow_vertical = 0
+text = "Roll"
