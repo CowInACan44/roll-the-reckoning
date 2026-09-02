@@ -3,13 +3,16 @@ extends Node2D
 const DIE_SCENE := preload("res://scenes/Die.tscn")
 const UNIT_TOKEN_SCENE := preload("res://scenes/unit_token.tscn")
 
-@export var spawn_area: Vector2 = Vector2(256, 256)
-const SPAWN_SPREAD := 40.0
+## Center of the felt bowl inside the 200x190 DiceRollerViewport (see
+## battle_ui.tscn's DiceRollerContainer - it's sized/positioned to match
+## the actual green circle in ui/DiceTray.png, not a round number).
+@export var spawn_area: Vector2 = Vector2(95, 90)
+const SPAWN_SPREAD := 14.0
 const CLASH_DICE_COUNT := 3
 
 ## Dice were built for a full-size scene - shrink them to fit inside the
-## 512x512 dice tray viewport. Tune this until they look right in the felt.
-const DICE_SCALE := 0.35
+## small felt-bowl viewport. Tune this until they look right in the felt.
+const DICE_SCALE := 0.28
 
 const MARCH_DURATION := 3.0  # seconds for a token to cross the whole track
 const MAX_UNITS_PER_DRAFT := 8  # keeps a single draft's march readable; tune freely
@@ -77,12 +80,36 @@ var awaiting_advance := false
 var wave := 1
 var village_hp := MAX_VILLAGE_HP
 var run_over := false
-var world_units: Array[Node2D] = []
 
 
 func _ready() -> void:
 	selector.count_selected.connect(_on_count_selected)
+	_build_tray_walls()
 	_enter_phase(Phase.TYPE)
+
+
+## The tray is small (200x190) and dice fling at up to FLING_MAX px/s in
+## Die.gd, easily enough to sail past the felt's edge before damping pulls
+## them back. Box the roll area in with invisible walls so flung dice
+## bounce back into view instead of settling somewhere outside the tray.
+func _build_tray_walls() -> void:
+	var half_extents := Vector2(100, 95)
+	var thickness := 20.0
+	_add_wall(spawn_area + Vector2(0, -half_extents.y), Vector2(half_extents.x * 2, thickness))
+	_add_wall(spawn_area + Vector2(0, half_extents.y), Vector2(half_extents.x * 2, thickness))
+	_add_wall(spawn_area + Vector2(-half_extents.x, 0), Vector2(thickness, half_extents.y * 2))
+	_add_wall(spawn_area + Vector2(half_extents.x, 0), Vector2(thickness, half_extents.y * 2))
+
+
+func _add_wall(pos: Vector2, size: Vector2) -> void:
+	var wall := StaticBody2D.new()
+	wall.position = pos
+	var shape := CollisionShape2D.new()
+	var rect := RectangleShape2D.new()
+	rect.size = size
+	shape.shape = rect
+	wall.add_child(shape)
+	add_child(wall)
 
 
 func _enter_phase(new_phase: Phase) -> void:
@@ -226,7 +253,8 @@ func _show_unit_icon(texture: Texture2D) -> void:
 		unit_icon.queue_free()
 	unit_icon = Sprite2D.new()
 	unit_icon.texture = texture
-	unit_icon.position = spawn_area + Vector2(0, -140)
+	unit_icon.scale = Vector2(0.16, 0.16)  # source avatar art is 256x256 - shrink to fit the tray
+	unit_icon.position = spawn_area + Vector2(0, -55)
 	add_child(unit_icon)
 
 
@@ -268,31 +296,18 @@ func _spawn_marching_token(texture: Texture2D, rarity: int, start_delay: float =
 	var tween := create_tween()
 	tween.tween_interval(start_delay)
 	tween.tween_property(follow, "progress_ratio", 1.0, MARCH_DURATION)
-	tween.finished.connect(_on_march_finished.bind(follow, token))
+	tween.finished.connect(_on_march_finished.bind(follow))
 
 
-## A token reached the end of the screen-space march track. Hand it off to
-## whatever's in the "battle_world" group so it becomes a real unit
-## standing in the village instead of just despawning at the screen edge.
+## A token reached the end of the screen-space march track and vanishes.
 ##
-## NOTE: this assumes no Camera2D exists yet, so the UI canvas layer and
-## the world canvas currently line up 1:1 in pixel space. Once the planned
-## RTS pan/zoom camera goes in, this needs a real screen-to-world
-## conversion instead of a straight reparent.
-func _on_march_finished(follow: PathFollow2D, token: UnitToken) -> void:
-	if run_over:
-		follow.queue_free()
-		return
-	var world: Node2D = get_tree().get_first_node_in_group("battle_world")
-	if world == null:
-		push_warning("No node in group 'battle_world' - did you add it to the village scene?")
-		follow.queue_free()
-		return
-	var landing_spot := follow.global_position + Vector2(randf_range(-24, 24), randf_range(-12, 12))
-	token.reparent(world, true)
-	token.global_position = landing_spot
+## TODO(portal): this is where the actual siege should begin - a portal
+## effect opening in the village (found via the "battle_world" group,
+## already tagged on village.tscn) that the real unit walks out of and
+## starts attacking from. Deliberately not built yet - for now the token
+## just disappears at the track's end.
+func _on_march_finished(follow: PathFollow2D) -> void:
 	follow.queue_free()
-	world_units.append(token)
 
 
 func _show_quantity_results() -> void:
@@ -300,16 +315,17 @@ func _show_quantity_results() -> void:
 	for r in quantity_by_rarity.keys():
 		var count: int = quantity_by_rarity[r]
 		var icon := Sprite2D.new()
-		var img := Image.create(48, 48, false, Image.FORMAT_RGBA8)
+		var img := Image.create(16, 16, false, Image.FORMAT_RGBA8)
 		img.fill(RARITY_COLORS[r])
 		icon.texture = ImageTexture.create_from_image(img)
-		icon.position = spawn_area + Vector2(-100 + index * 70, -60)
+		icon.position = spawn_area + Vector2(-70 + index * 26, -60)
 		add_child(icon)
 		active_result_icons.append(icon)
 
 		var label := Label.new()
 		label.text = str(count)
-		label.position = icon.position + Vector2(-8, 20)
+		label.add_theme_font_size_override("font_size", 12)
+		label.position = icon.position + Vector2(-4, 8)
 		add_child(label)
 		active_result_icons.append(label)
 		index += 1
@@ -322,8 +338,9 @@ func _show_clash_results() -> void:
 		var rarity: int = rolled_rarities[i]
 		var label := Label.new()
 		label.text = icon_name
+		label.add_theme_font_size_override("font_size", 12)
 		label.modulate = RARITY_COLORS[rarity]
-		label.position = spawn_area + Vector2(-60 + index * 60, -60)
+		label.position = spawn_area + Vector2(-65 + index * 45, -60)
 		add_child(label)
 		active_result_icons.append(label)
 		index += 1
@@ -343,7 +360,6 @@ func _resolve_clash() -> void:
 			village_hp -= CLASH_SIEGE_DAMAGE.get(icon_index, 1)
 		elif defender_rarity > monster_rarity:
 			village_hp = mini(village_hp + DEFENDER_WIN_HEAL, MAX_VILLAGE_HP)
-			_lose_one_unit()
 	village_hp = clampi(village_hp, 0, MAX_VILLAGE_HP)
 	_update_hud()
 
@@ -367,14 +383,6 @@ func _roll_defender_rarity() -> int:
 		if roll <= cumulative:
 			return rarity
 	return Die.Rarity.COMMON
-
-
-func _lose_one_unit() -> void:
-	if world_units.is_empty():
-		return
-	var unit: Node2D = world_units.pop_back()
-	if is_instance_valid(unit):
-		unit.queue_free()
 
 
 func _end_run(village_fell: bool) -> void:
