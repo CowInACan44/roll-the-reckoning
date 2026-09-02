@@ -12,7 +12,7 @@ const CLASH_DICE_COUNT := 3
 
 ## Dice were built for a full-size scene - shrink them to fit inside the
 ## small felt-bowl viewport. Tune this until they look right in the felt.
-const DICE_SCALE := 0.15
+const DICE_SCALE := 0.08
 
 const MARCH_DURATION := 3.0  # seconds for a token to cross the whole track
 const MAX_UNITS_PER_DRAFT := 8  # keeps a single draft's march readable; tune freely
@@ -253,7 +253,7 @@ func _show_unit_icon(texture: Texture2D) -> void:
 		unit_icon.queue_free()
 	unit_icon = Sprite2D.new()
 	unit_icon.texture = texture
-	unit_icon.scale = Vector2(0.16, 0.16)  # source avatar art is 256x256 - shrink to fit the tray
+	unit_icon.scale = Vector2(0.09, 0.09)  # source avatar art is 256x256 - shrink to fit the tray
 	unit_icon.position = spawn_area + Vector2(0, -55)
 	add_child(unit_icon)
 
