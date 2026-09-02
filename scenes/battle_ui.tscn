@@ -75,6 +75,7 @@ rare_icons = Array[Texture2D]([ExtResource("4_1m1i6"), ExtResource("5_hnkxu"), E
 common_icons = Array[Texture2D]([ExtResource("9_k0kd0"), ExtResource("10_ms1mg"), ExtResource("11_wuh40"), ExtResource("12_eo00v"), ExtResource("13_3a1b4")])
 
 [node name="DiceCountSelector" parent="UIRoot/DiceRollerContainer/DiceRollerViewport/DiceRoller" unique_id=1754363337 instance=ExtResource("2_lgetq")]
+position = Vector2(40, 170)
 
 [node name="MarchTrack" type="Path2D" parent="UIRoot" unique_id=1051615158]
 groups=PackedStringArray("march_track")

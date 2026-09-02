@@ -9,8 +9,8 @@ signal count_selected(count: int)
 
 const CELL_SIZE := Vector2(112, 112)
 const PIP_ROW := 0
-const ICON_SCALE := Vector2(0.6, 0.6)
-const ICON_SPACING := 80.0
+const ICON_SCALE := Vector2(0.16, 0.16)
+const ICON_SPACING := 24.0
 
 const DIM_COLOR := Color(0.35, 0.35, 0.35, 0.6)
 const LIT_COLOR := Color(1, 1, 1, 1)
