@@ -3,15 +3,40 @@ extends Node2D
 const DIE_SCENE := preload("res://scenes/Die.tscn")
 const UNIT_TOKEN_SCENE := preload("res://scenes/unit_token.tscn")
 
-@export var spawn_area: Vector2 = Vector2(256, 256)
-const SPAWN_SPREAD := 40.0
+## Center of the felt bowl inside the 200x190 DiceRollerViewport (see
+## battle_ui.tscn's DiceRollerContainer - it's sized/positioned to match
+## the actual green circle in ui/DiceTray.png, not a round number).
+@export var spawn_area: Vector2 = Vector2(95, 90)
+const SPAWN_SPREAD := 8.0
 const CLASH_DICE_COUNT := 3
 
 ## Dice were built for a full-size scene - shrink them to fit inside the
-## 512x512 dice tray viewport. Tune this until they look right in the felt.
-const DICE_SCALE := 0.35
+## small felt-bowl viewport no matter how many are thrown at once (1-6).
+## Scale shrinks as count grows instead of using one fixed size, so a
+## single die and a full six-dice throw both stay inside the circle.
+const DICE_SCALE_BASE := 0.11
+const DICE_SCALE_MIN := 0.035
 
 const MARCH_DURATION := 3.0  # seconds for a token to cross the whole track
+const MAX_UNITS_PER_DRAFT := 8  # keeps a single draft's march readable; tune freely
+
+const WAVE_COUNT := 5
+const MAX_VILLAGE_HP := 20
+
+## First-draft CLASH resolution rules. The concept doc marks the exact
+## clash format as still undecided - treat these numbers as placeholders
+## to rebalance once the real rules are nailed down, not a final design.
+const CLASH_SIEGE_DAMAGE := {
+	# icon index (matches ICON_NAMES) -> village HP lost if the summoned
+	# monsters win that lane's rarity contest against the defenders
+	0: 1, # Heart
+	1: 3, # Skull
+	2: 2, # Fist
+	3: 2, # Sword
+	4: 1, # Shield
+	5: 2, # Swirl
+}
+const DEFENDER_WIN_HEAL := 1  # village HP recovered per lane the defenders win
 
 enum Phase { TYPE, QUANTITY, CLASH }
 
@@ -51,13 +76,43 @@ var active_result_icons: Array[CanvasItem] = []
 
 var type_dice: Array[Die] = []
 var unit_icon: Sprite2D = null
+var drafted_texture: Texture2D = null
 
 var awaiting_advance := false
+
+var wave := 1
+var village_hp := MAX_VILLAGE_HP
+var run_over := false
 
 
 func _ready() -> void:
 	selector.count_selected.connect(_on_count_selected)
+	_build_tray_walls()
 	_enter_phase(Phase.TYPE)
+
+
+## The tray is small (200x190) and dice fling at up to FLING_MAX px/s in
+## Die.gd, easily enough to sail past the felt's edge before damping pulls
+## them back. Box the roll area in with invisible walls so flung dice
+## bounce back into view instead of settling somewhere outside the tray.
+func _build_tray_walls() -> void:
+	var half_extents := Vector2(70, 65)
+	var thickness := 20.0
+	_add_wall(spawn_area + Vector2(0, -half_extents.y), Vector2(half_extents.x * 2, thickness))
+	_add_wall(spawn_area + Vector2(0, half_extents.y), Vector2(half_extents.x * 2, thickness))
+	_add_wall(spawn_area + Vector2(-half_extents.x, 0), Vector2(thickness, half_extents.y * 2))
+	_add_wall(spawn_area + Vector2(half_extents.x, 0), Vector2(thickness, half_extents.y * 2))
+
+
+func _add_wall(pos: Vector2, size: Vector2) -> void:
+	var wall := StaticBody2D.new()
+	wall.position = pos
+	var shape := CollisionShape2D.new()
+	var rect := RectangleShape2D.new()
+	rect.size = size
+	shape.shape = rect
+	wall.add_child(shape)
+	add_child(wall)
 
 
 func _enter_phase(new_phase: Phase) -> void:
@@ -76,6 +131,7 @@ func _enter_phase(new_phase: Phase) -> void:
 			selector.visible = false
 		Phase.QUANTITY:
 			selector.visible = true
+			selector.max_count = clampi(wave + 1, 1, 6)
 		Phase.CLASH:
 			selector.visible = false
 			_spawn_dice(CLASH_DICE_COUNT, Die.ICON_ROW, true)
@@ -103,7 +159,8 @@ func _clear_result_icons() -> void:
 
 
 func _input(event: InputEvent) -> void:
-	print("input reached DiceRoller: ", event)
+	if run_over:
+		return
 	if not (event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT):
 		return
 
@@ -130,10 +187,11 @@ func _spawn_dice(count: int, row: int, use_rarity: bool, track_as_type: bool = f
 	dice_expected = count
 	rolled_values.clear()
 	rolled_rarities.clear()
+	var die_scale := _dice_scale_for_count(count)
 	for i in count:
 		var die: Die = DIE_SCENE.instantiate()
 		add_child(die)
-		die.scale = Vector2(DICE_SCALE, DICE_SCALE)
+		die.scale = Vector2(die_scale, die_scale)
 		if track_as_type:
 			type_dice.append(die)
 		else:
@@ -141,6 +199,12 @@ func _spawn_dice(count: int, row: int, use_rarity: bool, track_as_type: bool = f
 		die.result_locked.connect(_on_die_result_locked)
 		var offset := Vector2(randf_range(-SPAWN_SPREAD, SPAWN_SPREAD), randf_range(-SPAWN_SPREAD, SPAWN_SPREAD))
 		die.summon(spawn_area + offset, count, row, use_rarity)
+
+
+## More dice thrown at once = smaller scale, so 1 die and 6 dice both fit
+## inside the felt circle instead of one fixed size working for neither.
+func _dice_scale_for_count(count: int) -> float:
+	return clampf(DICE_SCALE_BASE / sqrt(float(count)), DICE_SCALE_MIN, DICE_SCALE_BASE)
 
 
 func _on_die_result_locked(value: int, rarity: int) -> void:
@@ -159,9 +223,8 @@ func _on_die_result_locked(value: int, rarity: int) -> void:
 			if pool.is_empty():
 				_enter_phase(Phase.QUANTITY)
 				return
-			var chosen_texture: Texture2D = pool[randi() % pool.size()]
-			_show_unit_icon(chosen_texture)
-			_spawn_marching_token(chosen_texture)
+			drafted_texture = pool[randi() % pool.size()]
+			_show_unit_icon(drafted_texture)
 			_enter_phase(Phase.QUANTITY)
 
 		Phase.QUANTITY:
@@ -170,13 +233,15 @@ func _on_die_result_locked(value: int, rarity: int) -> void:
 				var r: int = rolled_rarities[i]
 				var v: int = rolled_values[i]
 				quantity_by_rarity[r] = quantity_by_rarity.get(r, 0) + v
-			_show_quantity_results()
+			_spawn_drafted_units()
 			selector.visible = false
 			awaiting_advance = true
 
 		Phase.CLASH:
 			_show_clash_results()
-			awaiting_advance = true
+			_resolve_clash()
+			if not run_over:
+				awaiting_advance = true
 
 
 func _pool_for_range(range_key: String) -> Array[Texture2D]:
@@ -197,49 +262,61 @@ func _show_unit_icon(texture: Texture2D) -> void:
 		unit_icon.queue_free()
 	unit_icon = Sprite2D.new()
 	unit_icon.texture = texture
-	unit_icon.position = spawn_area + Vector2(0, -140)
+	unit_icon.scale = Vector2(0.09, 0.09)  # source avatar art is 256x256 - shrink to fit the tray
+	unit_icon.position = spawn_area + Vector2(0, -55)
 	add_child(unit_icon)
 
 
-## NEW: this is the piece that was never wired up - spawns a UnitToken
-## on the march track (which lives in a totally different scene/viewport,
-## found via group membership) and tweens it across over MARCH_DURATION.
-func _spawn_marching_token(texture: Texture2D) -> void:
+## Sends every unit drafted this QUANTITY roll marching down the track,
+## one by one, tinted by whichever rarity die produced it. Total is capped
+## at MAX_UNITS_PER_DRAFT so a lucky legendary-heavy roll doesn't flood the
+## track with dozens of overlapping tokens.
+func _spawn_drafted_units() -> void:
+	if drafted_texture == null:
+		return
+	var spawned := 0
+	for rarity in quantity_by_rarity.keys():
+		var count: int = quantity_by_rarity[rarity]
+		for i in count:
+			if spawned >= MAX_UNITS_PER_DRAFT:
+				return
+			_spawn_marching_token(drafted_texture, rarity, spawned * 0.15)
+			spawned += 1
+
+
+## Spawns a UnitToken on the march track (which lives in a totally
+## different scene/viewport, found via group membership) and tweens it
+## across over MARCH_DURATION, then hands it off to _on_march_finished.
+func _spawn_marching_token(texture: Texture2D, rarity: int, start_delay: float = 0.0) -> void:
 	var track: Path2D = get_tree().get_first_node_in_group("march_track")
 	if track == null:
 		push_warning("No node in group 'march_track' - did you add MarchTrack to it?")
 		return
 	var follow := PathFollow2D.new()
 	follow.rotates = false
+	follow.progress_ratio = 0.0
 	track.add_child(follow)
 
 	var token: UnitToken = UNIT_TOKEN_SCENE.instantiate()
 	follow.add_child(token)
 	token.set_icon_texture(texture)
+	token.modulate = RARITY_COLORS[rarity]
 
 	var tween := create_tween()
+	tween.tween_interval(start_delay)
 	tween.tween_property(follow, "progress_ratio", 1.0, MARCH_DURATION)
-	tween.finished.connect(func(): follow.queue_free())
+	tween.finished.connect(_on_march_finished.bind(follow))
 
 
-func _show_quantity_results() -> void:
-	var index := 0
-	for r in quantity_by_rarity.keys():
-		var count: int = quantity_by_rarity[r]
-		var icon := Sprite2D.new()
-		var img := Image.create(48, 48, false, Image.FORMAT_RGBA8)
-		img.fill(RARITY_COLORS[r])
-		icon.texture = ImageTexture.create_from_image(img)
-		icon.position = spawn_area + Vector2(-100 + index * 70, -60)
-		add_child(icon)
-		active_result_icons.append(icon)
-
-		var label := Label.new()
-		label.text = str(count)
-		label.position = icon.position + Vector2(-8, 20)
-		add_child(label)
-		active_result_icons.append(label)
-		index += 1
+## A token reached the end of the screen-space march track and vanishes.
+##
+## TODO(portal): this is where the actual siege should begin - a portal
+## effect opening in the village (found via the "battle_world" group,
+## already tagged on village.tscn) that the real unit walks out of and
+## starts attacking from. Deliberately not built yet - for now the token
+## just disappears at the track's end.
+func _on_march_finished(follow: PathFollow2D) -> void:
+	follow.queue_free()
 
 
 func _show_clash_results() -> void:
@@ -249,14 +326,82 @@ func _show_clash_results() -> void:
 		var rarity: int = rolled_rarities[i]
 		var label := Label.new()
 		label.text = icon_name
+		label.add_theme_font_size_override("font_size", 12)
 		label.modulate = RARITY_COLORS[rarity]
-		label.position = spawn_area + Vector2(-60 + index * 60, -60)
+		label.position = spawn_area + Vector2(-65 + index * 45, -60)
 		add_child(label)
 		active_result_icons.append(label)
 		index += 1
 
 
+## Resolves this wave's CLASH exchange: each of the 3 rolled icon lanes
+## pits the summoned monsters' rarity against an instantly-rolled defender
+## rarity (the village's counter-roll - it doesn't get physical dice, just
+## a weighted pick using the same table Die.gd uses). The winning side
+## applies that icon's effect from CLASH_SIEGE_DAMAGE above.
+func _resolve_clash() -> void:
+	for i in rolled_values.size():
+		var icon_index: int = rolled_values[i] - 1
+		var monster_rarity: int = rolled_rarities[i]
+		var defender_rarity: int = _roll_defender_rarity()
+		if monster_rarity > defender_rarity:
+			village_hp -= CLASH_SIEGE_DAMAGE.get(icon_index, 1)
+		elif defender_rarity > monster_rarity:
+			village_hp = mini(village_hp + DEFENDER_WIN_HEAL, MAX_VILLAGE_HP)
+	village_hp = clampi(village_hp, 0, MAX_VILLAGE_HP)
+	_update_hud()
+
+	if village_hp <= 0:
+		_end_run(true)
+		return
+
+	wave += 1
+	if wave > WAVE_COUNT:
+		_end_run(false)
+
+
+func _roll_defender_rarity() -> int:
+	var total := 0.0
+	for w in Die.RARITY_WEIGHTS.values():
+		total += w
+	var roll := randf() * total
+	var cumulative := 0.0
+	for rarity in Die.RARITY_WEIGHTS.keys():
+		cumulative += Die.RARITY_WEIGHTS[rarity]
+		if roll <= cumulative:
+			return rarity
+	return Die.Rarity.COMMON
+
+
+func _end_run(village_fell: bool) -> void:
+	run_over = true
+	var hud := _get_hud()
+	if hud == null:
+		return
+	var banner: Label = hud.get_node_or_null("ResultBanner")
+	if banner:
+		banner.text = "VICTORY - the village has fallen!" if village_fell else "DEFEAT - the village held out all %d waves." % WAVE_COUNT
+
+
+func _get_hud() -> Control:
+	return get_tree().get_first_node_in_group("battle_hud") as Control
+
+
+func _update_hud() -> void:
+	var hud := _get_hud()
+	if hud == null:
+		return
+	var wave_label: Label = hud.get_node_or_null("WaveLabel")
+	if wave_label:
+		wave_label.text = "Wave %d/%d" % [mini(wave, WAVE_COUNT), WAVE_COUNT]
+	var hp_label: Label = hud.get_node_or_null("VillageHPLabel")
+	if hp_label:
+		hp_label.text = "Village HP: %d/%d" % [village_hp, MAX_VILLAGE_HP]
+
+
 func trigger_roll() -> void:
+	if run_over:
+		return
 	if awaiting_advance:
 		awaiting_advance = false
 		if phase == Phase.QUANTITY:

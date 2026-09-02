@@ -9,17 +9,26 @@ signal count_selected(count: int)
 
 const CELL_SIZE := Vector2(112, 112)
 const PIP_ROW := 0
-const ICON_SCALE := Vector2(0.6, 0.6)
-const ICON_SPACING := 80.0
+const ICON_SCALE := Vector2(0.16, 0.16)
+const ICON_SPACING := 24.0
 
 const DIM_COLOR := Color(0.35, 0.35, 0.35, 0.6)
 const LIT_COLOR := Color(1, 1, 1, 1)
+const LOCK_COLOR := Color(0.15, 0.1, 0.1, 0.5)
 
 var icons: Array[Sprite2D] = []
 var is_dragging := false
 var hovered_count := 0
 
 @export var dice_sheet: Texture2D
+
+## How many of the 6 icons are actually pickable right now - the rest show
+## locked/dim. main.gd raises this as the wave count climbs, so higher
+## dice counts (and their bigger rarity swings) unlock later in a run.
+var max_count := 6:
+	set(value):
+		max_count = clampi(value, 1, 6)
+		_refresh_icons()
 
 
 func _ready() -> void:
@@ -33,6 +42,7 @@ func _ready() -> void:
 		icon.modulate = DIM_COLOR
 		add_child(icon)
 		icons.append(icon)
+	_refresh_icons()
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -52,7 +62,7 @@ func _unhandled_input(event: InputEvent) -> void:
 func _update_hover(global_mouse_pos: Vector2) -> void:
 	var local_x := to_local(global_mouse_pos).x
 	var count := int(round(local_x / ICON_SPACING)) + 1
-	count = clampi(count, 1, 6)
+	count = clampi(count, 1, max_count)
 
 	# Only register as "over the selector" if reasonably close to the row.
 	var local_y := to_local(global_mouse_pos).y
@@ -63,9 +73,13 @@ func _update_hover(global_mouse_pos: Vector2) -> void:
 
 	hovered_count = count
 	for i in icons.size():
-		icons[i].modulate = LIT_COLOR if i < count else DIM_COLOR
+		icons[i].modulate = LIT_COLOR if i < count else (DIM_COLOR if i < max_count else LOCK_COLOR)
 
 
 func _reset_highlight() -> void:
-	for icon in icons:
-		icon.modulate = DIM_COLOR
+	_refresh_icons()
+
+
+func _refresh_icons() -> void:
+	for i in icons.size():
+		icons[i].modulate = DIM_COLOR if i < max_count else LOCK_COLOR
