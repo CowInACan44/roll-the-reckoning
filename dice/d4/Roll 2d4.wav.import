@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://38uipf20xrmb"
+path="res://.godot/imported/Roll 2d4.wav-f29d86e3143d10766b5736a1dfecbe22.sample"
+
+[deps]
+
+source_file="res://dice/d4/Roll 2d4.wav"
+dest_files=["res://.godot/imported/Roll 2d4.wav-f29d86e3143d10766b5736a1dfecbe22.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

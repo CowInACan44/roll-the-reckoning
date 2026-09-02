@@ -1,0 +1,15 @@
+[gd_scene format=3 uid="uid://426qtk28n8iq"]
+
+[ext_resource type="Script" uid="uid://3adej138vfi0" path="res://Scripts/unit_token.gd" id="1_7hfsl"]
+[ext_resource type="Texture2D" uid="uid://bqjjmqa5guahb" path="res://ui/Stick.png" id="2_ssgrr"]
+
+[node name="UnitToken" type="Node2D" unique_id=78073890]
+script = ExtResource("1_7hfsl")
+
+[node name="Stick" type="Sprite2D" parent="." unique_id=142042516]
+position = Vector2(-2.5, 60.5)
+scale = Vector2(0.99, 0.706)
+texture = ExtResource("2_ssgrr")
+
+[node name="Icon" type="Sprite2D" parent="." unique_id=287197530]
+scale = Vector2(1, 0.922)

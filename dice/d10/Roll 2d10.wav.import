@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://dkntgxsffultv"
+path="res://.godot/imported/Roll 2d10.wav-4325bc8e1150da1aec45c4d33c0df59f.sample"
+
+[deps]
+
+source_file="res://dice/d10/Roll 2d10.wav"
+dest_files=["res://.godot/imported/Roll 2d10.wav-4325bc8e1150da1aec45c4d33c0df59f.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

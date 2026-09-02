@@ -1,0 +1,20 @@
+[gd_scene format=3 uid="uid://dug2suox0jkg7"]
+
+[ext_resource type="Script" uid="uid://c1xf4cb625rsy" path="res://Scripts/main.gd" id="1_o5qli"]
+[ext_resource type="Texture2D" uid="uid://jufsf8r17bnf" path="res://Tiny/Tiny Swords (Free Pack)/UI Elements/UI from the page/Enemy Avatars/Enemy Avatars_16.png" id="2_trceg"]
+[ext_resource type="Texture2D" uid="uid://cup1cdckjdbqk" path="res://Tiny/Tiny Swords (Free Pack)/UI Elements/UI from the page/Enemy Avatars/Enemy Avatars_06.png" id="3_a8y0u"]
+[ext_resource type="Texture2D" uid="uid://droi8o1sgi37b" path="res://Tiny/Tiny Swords (Free Pack)/UI Elements/UI from the page/Enemy Avatars/Enemy Avatars_07.png" id="4_jkv2x"]
+[ext_resource type="Texture2D" uid="uid://b6anh3a41w57p" path="res://Tiny/Tiny Swords (Free Pack)/UI Elements/UI from the page/Enemy Avatars/Enemy Avatars_09.png" id="5_jbj1t"]
+[ext_resource type="Texture2D" uid="uid://bhvgjojid5r0w" path="res://Tiny/Tiny Swords (Free Pack)/UI Elements/UI from the page/Enemy Avatars/Enemy Avatars_11.png" id="6_muem4"]
+[ext_resource type="Texture2D" uid="uid://b8b6nhw00s25s" path="res://Tiny/Tiny Swords (Free Pack)/UI Elements/UI from the page/Enemy Avatars/Enemy Avatars_14.png" id="7_dp3eg"]
+[ext_resource type="Texture2D" uid="uid://b7eghlrd713ki" path="res://Tiny/Tiny Swords (Free Pack)/UI Elements/UI from the page/Enemy Avatars/Enemy Avatars_01.png" id="8_0ld40"]
+[ext_resource type="Texture2D" uid="uid://bscasvwfdhpoy" path="res://Tiny/Tiny Swords (Free Pack)/UI Elements/UI from the page/Enemy Avatars/Enemy Avatars_02.png" id="9_gqmmt"]
+[ext_resource type="Texture2D" uid="uid://q8ak2ptrsqn0" path="res://Tiny/Tiny Swords (Free Pack)/UI Elements/UI from the page/Enemy Avatars/Enemy Avatars_03.png" id="10_yc10j"]
+[ext_resource type="Texture2D" uid="uid://7d40gpq0tink" path="res://Tiny/Tiny Swords (Free Pack)/UI Elements/UI from the page/Enemy Avatars/Enemy Avatars_04.png" id="11_jscy8"]
+[ext_resource type="Texture2D" uid="uid://clg1sasha7dbt" path="res://Tiny/Tiny Swords (Free Pack)/UI Elements/UI from the page/Enemy Avatars/Enemy Avatars_05.png" id="12_pm3ni"]
+
+[node name="Main" type="Node2D" unique_id=1615647401]
+script = ExtResource("1_o5qli")
+boss_icon = ExtResource("2_trceg")
+rare_icons = Array[Texture2D]([ExtResource("3_a8y0u"), ExtResource("4_jkv2x"), ExtResource("5_jbj1t"), ExtResource("6_muem4"), ExtResource("7_dp3eg")])
+common_icons = Array[Texture2D]([ExtResource("8_0ld40"), ExtResource("9_gqmmt"), ExtResource("10_yc10j"), ExtResource("11_jscy8"), ExtResource("12_pm3ni")])

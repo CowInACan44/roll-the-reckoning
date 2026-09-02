@@ -1,0 +1,98 @@
+[gd_scene format=3 uid="uid://dek5niyr8uw0t"]
+
+[ext_resource type="Script" uid="uid://hyjxidpn3tn4" path="res://scenes/battle_ui.gd" id="1_1m1i6"]
+[ext_resource type="Texture2D" uid="uid://bjin8w7mpypwp" path="res://ui/DiceTray.png" id="1_lgetq"]
+[ext_resource type="Script" uid="uid://c1xf4cb625rsy" path="res://Scripts/main.gd" id="1_wvifm"]
+[ext_resource type="PackedScene" uid="uid://dg2y32dnikyfe" path="res://scenes/DiceCountSelector.tscn" id="2_lgetq"]
+[ext_resource type="Texture2D" uid="uid://jufsf8r17bnf" path="res://Tiny/Tiny Swords (Free Pack)/UI Elements/UI from the page/Enemy Avatars/Enemy Avatars_16.png" id="3_bw04g"]
+[ext_resource type="Texture2D" uid="uid://bhvgjojid5r0w" path="res://Tiny/Tiny Swords (Free Pack)/UI Elements/UI from the page/Enemy Avatars/Enemy Avatars_11.png" id="4_1m1i6"]
+[ext_resource type="PackedScene" uid="uid://426qtk28n8iq" path="res://scenes/unit_token.tscn" id="4_2a1ha"]
+[ext_resource type="Texture2D" uid="uid://clpu3r4fbgnxd" path="res://Tiny/Tiny Swords (Free Pack)/UI Elements/UI from the page/Enemy Avatars/Enemy Avatars_10.png" id="5_hnkxu"]
+[ext_resource type="Texture2D" uid="uid://b6anh3a41w57p" path="res://Tiny/Tiny Swords (Free Pack)/UI Elements/UI from the page/Enemy Avatars/Enemy Avatars_09.png" id="6_6jbvb"]
+[ext_resource type="Texture2D" uid="uid://cup1cdckjdbqk" path="res://Tiny/Tiny Swords (Free Pack)/UI Elements/UI from the page/Enemy Avatars/Enemy Avatars_06.png" id="7_y8ss2"]
+[ext_resource type="Texture2D" uid="uid://b8b6nhw00s25s" path="res://Tiny/Tiny Swords (Free Pack)/UI Elements/UI from the page/Enemy Avatars/Enemy Avatars_14.png" id="8_emian"]
+[ext_resource type="Texture2D" uid="uid://b7eghlrd713ki" path="res://Tiny/Tiny Swords (Free Pack)/UI Elements/UI from the page/Enemy Avatars/Enemy Avatars_01.png" id="9_k0kd0"]
+[ext_resource type="Texture2D" uid="uid://bscasvwfdhpoy" path="res://Tiny/Tiny Swords (Free Pack)/UI Elements/UI from the page/Enemy Avatars/Enemy Avatars_02.png" id="10_ms1mg"]
+[ext_resource type="Texture2D" uid="uid://7d40gpq0tink" path="res://Tiny/Tiny Swords (Free Pack)/UI Elements/UI from the page/Enemy Avatars/Enemy Avatars_04.png" id="11_wuh40"]
+[ext_resource type="Texture2D" uid="uid://q8ak2ptrsqn0" path="res://Tiny/Tiny Swords (Free Pack)/UI Elements/UI from the page/Enemy Avatars/Enemy Avatars_03.png" id="12_eo00v"]
+[ext_resource type="Texture2D" uid="uid://lufjimts3tur" path="res://Tiny/Tiny Swords (Free Pack)/UI Elements/UI from the page/Enemy Avatars/Enemy Avatars_12.png" id="13_3a1b4"]
+
+[sub_resource type="Curve2D" id="Curve2D_p5qam"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 230, 549, 0, 0, 0, 0, 328, 570, 0, 0, 0, 0, 436, 602, 0, 0, 0, 0, 555, 605, 0, 0, 0, 0, 691, 620, 0, 0, 0, 0, 822, 605, 0, 0, 0, 0, 959, 605, 0, 0, 0, 0, 1019, 580)
+}
+point_count = 8
+
+[node name="BattleUI" type="CanvasLayer" unique_id=1069348535]
+script = ExtResource("1_1m1i6")
+
+[node name="TextureRect" type="TextureRect" parent="." unique_id=1579217684]
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -8.0
+offset_top = -494.0
+offset_right = -3.0
+offset_bottom = 11.0
+grow_horizontal = 2
+grow_vertical = 0
+texture = ExtResource("1_lgetq")
+
+[node name="UIRoot" type="Control" parent="." unique_id=889494878]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="DiceRollerContainer" type="SubViewportContainer" parent="UIRoot" unique_id=1256103770]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+stretch = true
+
+[node name="DiceRollerViewport" type="SubViewport" parent="UIRoot/DiceRollerContainer" unique_id=1685128731]
+transparent_bg = true
+handle_input_locally = false
+canvas_item_default_texture_filter = 0
+size = Vector2i(2, 2)
+render_target_update_mode = 4
+
+[node name="DiceRoller" type="Node2D" parent="UIRoot/DiceRollerContainer/DiceRollerViewport" unique_id=348076225]
+script = ExtResource("1_wvifm")
+boss_icon = ExtResource("3_bw04g")
+rare_icons = Array[Texture2D]([ExtResource("4_1m1i6"), ExtResource("5_hnkxu"), ExtResource("6_6jbvb"), ExtResource("7_y8ss2"), ExtResource("8_emian")])
+common_icons = Array[Texture2D]([ExtResource("9_k0kd0"), ExtResource("10_ms1mg"), ExtResource("11_wuh40"), ExtResource("12_eo00v"), ExtResource("13_3a1b4")])
+
+[node name="DiceCountSelector" parent="UIRoot/DiceRollerContainer/DiceRollerViewport/DiceRoller" unique_id=1754363337 instance=ExtResource("2_lgetq")]
+
+[node name="MarchTrack" type="Path2D" parent="UIRoot" unique_id=1051615158]
+curve = SubResource("Curve2D_p5qam")
+
+[node name="PathFollow2D" type="PathFollow2D" parent="UIRoot/MarchTrack" unique_id=726076869]
+position = Vector2(681.2095, 618.9202)
+rotation = 0.10985012
+progress = 458.82764
+
+[node name="UnitToken" parent="UIRoot/MarchTrack/PathFollow2D" unique_id=78073890 instance=ExtResource("4_2a1ha")]
+
+[node name="RollButton" type="Button" parent="UIRoot" unique_id=875246777]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -4.0
+offset_top = -12.0
+offset_right = 54.0
+grow_horizontal = 2
+grow_vertical = 0

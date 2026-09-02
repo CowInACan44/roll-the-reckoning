@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://dg2y32dnikyfe"]
+
+[ext_resource type="Script" uid="uid://b3dhok4taitx3" path="res://Scripts/DiceCountSelector.gd" id="1_n6q06"]
+[ext_resource type="Texture2D" uid="uid://qo3bac34xqh4" path="res://dice/CuteDice - AssetPack_v1.0/UpscaledDice_White.png" id="2_cdd6g"]
+
+[node name="DiceCountSelector" type="Node2D" unique_id=1754363337]
+script = ExtResource("1_n6q06")
+dice_sheet = ExtResource("2_cdd6g")

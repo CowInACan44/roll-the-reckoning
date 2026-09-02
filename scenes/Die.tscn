@@ -1,0 +1,79 @@
+[gd_scene format=3 uid="uid://6hou7fm3ktk2"]
+
+[ext_resource type="Script" uid="uid://bksnty6r1bkkf" path="res://Scripts/Die.gd" id="1_hvcds"]
+[ext_resource type="Texture2D" uid="uid://qo3bac34xqh4" path="res://dice/CuteDice - AssetPack_v1.0/UpscaledDice_White.png" id="2_e5bsa"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ya8ws"]
+atlas = ExtResource("2_e5bsa")
+region = Rect2(0, 560, 112, 112)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_irgc1"]
+atlas = ExtResource("2_e5bsa")
+region = Rect2(112, 560, 112, 112)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_pg1s8"]
+atlas = ExtResource("2_e5bsa")
+region = Rect2(224, 560, 112, 112)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_lmrdk"]
+atlas = ExtResource("2_e5bsa")
+region = Rect2(336, 560, 112, 112)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_yeu2p"]
+atlas = ExtResource("2_e5bsa")
+region = Rect2(560, 560, 112, 112)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4ryx6"]
+atlas = ExtResource("2_e5bsa")
+region = Rect2(448, 560, 112, 112)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_bhunq"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ya8ws")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_irgc1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_pg1s8")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_lmrdk")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_yeu2p")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4ryx6")
+}],
+"loop": 1,
+"name": &"default",
+"speed": 12.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_bhunq"]
+size = Vector2(95, 107)
+
+[node name="Die" type="RigidBody2D" unique_id=1014379377]
+script = ExtResource("1_hvcds")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=199983765]
+sprite_frames = SubResource("SpriteFrames_bhunq")
+frame_progress = 0.68300205
+
+[node name="NumeralSprite" type="Sprite2D" parent="." unique_id=1297896185]
+visible = false
+texture = ExtResource("2_e5bsa")
+region_enabled = true
+region_rect = Rect2(2, 30, 24, 24)
+
+[node name="RollTimer" type="Timer" parent="." unique_id=1164282363]
+wait_time = 0.07
+
+[node name="RollSound" type="AudioStreamPlayer" parent="." unique_id=1738581387]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1196950777]
+position = Vector2(0.5, 0.5)
+shape = SubResource("RectangleShape2D_bhunq")
