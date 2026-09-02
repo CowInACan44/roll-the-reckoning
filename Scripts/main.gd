@@ -11,8 +11,11 @@ const SPAWN_SPREAD := 8.0
 const CLASH_DICE_COUNT := 3
 
 ## Dice were built for a full-size scene - shrink them to fit inside the
-## small felt-bowl viewport. Tune this until they look right in the felt.
-const DICE_SCALE := 0.08
+## small felt-bowl viewport no matter how many are thrown at once (1-6).
+## Scale shrinks as count grows instead of using one fixed size, so a
+## single die and a full six-dice throw both stay inside the circle.
+const DICE_SCALE_BASE := 0.11
+const DICE_SCALE_MIN := 0.035
 
 const MARCH_DURATION := 3.0  # seconds for a token to cross the whole track
 const MAX_UNITS_PER_DRAFT := 8  # keeps a single draft's march readable; tune freely
@@ -184,10 +187,11 @@ func _spawn_dice(count: int, row: int, use_rarity: bool, track_as_type: bool = f
 	dice_expected = count
 	rolled_values.clear()
 	rolled_rarities.clear()
+	var die_scale := _dice_scale_for_count(count)
 	for i in count:
 		var die: Die = DIE_SCENE.instantiate()
 		add_child(die)
-		die.scale = Vector2(DICE_SCALE, DICE_SCALE)
+		die.scale = Vector2(die_scale, die_scale)
 		if track_as_type:
 			type_dice.append(die)
 		else:
@@ -195,6 +199,12 @@ func _spawn_dice(count: int, row: int, use_rarity: bool, track_as_type: bool = f
 		die.result_locked.connect(_on_die_result_locked)
 		var offset := Vector2(randf_range(-SPAWN_SPREAD, SPAWN_SPREAD), randf_range(-SPAWN_SPREAD, SPAWN_SPREAD))
 		die.summon(spawn_area + offset, count, row, use_rarity)
+
+
+## More dice thrown at once = smaller scale, so 1 die and 6 dice both fit
+## inside the felt circle instead of one fixed size working for neither.
+func _dice_scale_for_count(count: int) -> float:
+	return clampf(DICE_SCALE_BASE / sqrt(float(count)), DICE_SCALE_MIN, DICE_SCALE_BASE)
 
 
 func _on_die_result_locked(value: int, rarity: int) -> void:
@@ -223,7 +233,6 @@ func _on_die_result_locked(value: int, rarity: int) -> void:
 				var r: int = rolled_rarities[i]
 				var v: int = rolled_values[i]
 				quantity_by_rarity[r] = quantity_by_rarity.get(r, 0) + v
-			_show_quantity_results()
 			_spawn_drafted_units()
 			selector.visible = false
 			awaiting_advance = true
@@ -308,27 +317,6 @@ func _spawn_marching_token(texture: Texture2D, rarity: int, start_delay: float =
 ## just disappears at the track's end.
 func _on_march_finished(follow: PathFollow2D) -> void:
 	follow.queue_free()
-
-
-func _show_quantity_results() -> void:
-	var index := 0
-	for r in quantity_by_rarity.keys():
-		var count: int = quantity_by_rarity[r]
-		var icon := Sprite2D.new()
-		var img := Image.create(16, 16, false, Image.FORMAT_RGBA8)
-		img.fill(RARITY_COLORS[r])
-		icon.texture = ImageTexture.create_from_image(img)
-		icon.position = spawn_area + Vector2(-70 + index * 26, -60)
-		add_child(icon)
-		active_result_icons.append(icon)
-
-		var label := Label.new()
-		label.text = str(count)
-		label.add_theme_font_size_override("font_size", 12)
-		label.position = icon.position + Vector2(-4, 8)
-		add_child(label)
-		active_result_icons.append(label)
-		index += 1
 
 
 func _show_clash_results() -> void:
