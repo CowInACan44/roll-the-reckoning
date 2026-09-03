@@ -29,6 +29,14 @@ const BOB_AMOUNT := 6.0  # degrees of left-right tilt while marching
 		stick_vertical_offset = value
 		_apply_stick_offset()
 
+## Which way the token is marching. Flips the whole token (icon + stick)
+## horizontally so it walks toward the track's end instead of backwards -
+## main.gd sets this from march_side when it spawns a token.
+@export var facing_right: bool = true:
+	set(value):
+		facing_right = value
+		_apply_facing()
+
 var _bob_time := 0.0
 
 
@@ -36,6 +44,7 @@ func _ready() -> void:
 	_apply_stick_scale()
 	_apply_icon_scale()
 	_apply_stick_offset()
+	_apply_facing()
 
 
 func _apply_stick_scale() -> void:
@@ -51,6 +60,10 @@ func _apply_icon_scale() -> void:
 func _apply_stick_offset() -> void:
 	if stick:
 		stick.position.y = stick_vertical_offset
+
+
+func _apply_facing() -> void:
+	scale.x = absf(scale.x) * (1.0 if facing_right else -1.0)
 
 
 ## Call this once when a unit is drafted, to hand this token its icon art.
