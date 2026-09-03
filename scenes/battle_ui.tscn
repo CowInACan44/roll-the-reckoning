@@ -17,11 +17,17 @@
 [ext_resource type="Texture2D" uid="uid://q8ak2ptrsqn0" path="res://Tiny/Tiny Swords (Free Pack)/UI Elements/UI from the page/Enemy Avatars/Enemy Avatars_03.png" id="12_eo00v"]
 [ext_resource type="Texture2D" uid="uid://lufjimts3tur" path="res://Tiny/Tiny Swords (Free Pack)/UI Elements/UI from the page/Enemy Avatars/Enemy Avatars_12.png" id="13_3a1b4"]
 
-[sub_resource type="Curve2D" id="Curve2D_p5qam"]
+[sub_resource type="Curve2D" id="Curve2D_left"]
 _data = {
-"points": PackedVector2Array(0, 0, 0, 0, 230, 549, 0, 0, 0, 0, 328, 570, 0, 0, 0, 0, 436, 602, 0, 0, 0, 0, 555, 605, 0, 0, 0, 0, 691, 620, 0, 0, 0, 0, 822, 605, 0, 0, 0, 0, 959, 605, 0, 0, 0, 0, 1019, 580)
+"points": PackedVector2Array(0, 0, 0, 0, -90, -55, 0, 0, 0, 0, -600, -55)
 }
-point_count = 8
+point_count = 2
+
+[sub_resource type="Curve2D" id="Curve2D_right"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 90, -55, 0, 0, 0, 0, 600, -55)
+}
+point_count = 2
 
 [node name="BattleUI" type="CanvasLayer"]
 script = ExtResource("1_1m1i6")
@@ -81,9 +87,12 @@ common_icons = Array[Texture2D]([ExtResource("9_k0kd0"), ExtResource("10_ms1mg")
 
 [node name="DiceCountSelector" parent="UIRoot/TrayAnchor/DiceRollerContainer/DiceRollerViewport/DiceRoller" instance=ExtResource("2_lgetq")]
 
-[node name="MarchTrack" type="Path2D" parent="UIRoot"]
+[node name="MarchTrackLeft" type="Path2D" parent="UIRoot/TrayAnchor"]
 groups=PackedStringArray("march_track")
-curve = SubResource("Curve2D_p5qam")
+curve = SubResource("Curve2D_left")
+
+[node name="MarchTrackRight" type="Path2D" parent="UIRoot/TrayAnchor"]
+curve = SubResource("Curve2D_right")
 
 [node name="RollButton" type="Button" parent="UIRoot"]
 layout_mode = 1
