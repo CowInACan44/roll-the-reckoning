@@ -7,6 +7,16 @@ extends CanvasLayer
 ## main.gd's _get_hud().
 
 @onready var dice_roller: Node2D = $UIRoot/TrayAnchor/DiceRollerContainer/DiceRollerViewport/DiceRoller
+
+## Same rect as DiceRollerContainer, invisible (alpha 0), and the actual
+## click target for rolling. DiceRoller's own _input() was meant to catch
+## clicks falling through DiceRollerContainer's ignored mouse filter, but
+## verified against a real running instance that a click event never
+## reaches it - DiceRollerViewport has handle_input_locally = false and
+## nothing was forwarding events into it. This real Button is what
+## reliably works, calling trigger_roll() directly like the old RollButton
+## used to.
+@onready var felt_click_button: Button = $UIRoot/TrayAnchor/FeltClickButton
 @onready var ui_root: Control = $UIRoot
 
 @onready var path_left: Sprite2D = $UIRoot/TrayAnchor/PathLeft
@@ -27,6 +37,7 @@ var ledger_label: Label
 
 
 func _ready() -> void:
+	felt_click_button.pressed.connect(_on_felt_click_button_pressed)
 	path_left_button.pressed.connect(_on_path_left_pressed)
 	path_right_button.pressed.connect(_on_path_right_pressed)
 	# Hand the march tracks to the dice roller directly rather than having
@@ -40,6 +51,10 @@ func _ready() -> void:
 	_build_hud_labels()
 	_build_ledger_ui()
 	_update_path_highlight()
+
+
+func _on_felt_click_button_pressed() -> void:
+	dice_roller.trigger_roll()
 
 
 ## Click a path to send the next drafted unit's march out that portal

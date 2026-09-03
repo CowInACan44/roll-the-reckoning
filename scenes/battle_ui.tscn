@@ -85,6 +85,14 @@ size = Vector2(188, 188)
 mouse_filter = 2
 stretch = true
 
+[node name="FeltClickButton" type="Button" parent="UIRoot/TrayAnchor"]
+position = Vector2(-94, -218)
+size = Vector2(188, 188)
+focus_mode = 0
+flat = true
+modulate = Color(1, 1, 1, 0)
+text = ""
+
 [node name="DiceRollerViewport" type="SubViewport" parent="UIRoot/TrayAnchor/DiceRollerContainer"]
 transparent_bg = true
 handle_input_locally = false

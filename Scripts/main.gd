@@ -328,7 +328,15 @@ func _format_ledger_row(low: int, high: int, range_key: String) -> String:
 func _names_for_range(range_key: String) -> Array[String]:
 	match range_key:
 		"boss":
-			return [boss_name] if boss_icon else []
+			# Not `[boss_name] if boss_icon else []` - a bare array literal
+			# like that is an untyped Array even though the ternary sits in
+			# an Array[String]-returning function, and assigning it at the
+			# call site throws at runtime ("Trying to assign an array of
+			# type Array to a variable of type Array[String]").
+			var boss_names: Array[String] = []
+			if boss_icon:
+				boss_names.append(boss_name)
+			return boss_names
 		"rare":
 			return rare_names if rare_names.size() == rare_icons.size() else _placeholder_names(rare_icons.size())
 		_:
