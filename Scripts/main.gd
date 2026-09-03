@@ -19,6 +19,14 @@ const FELT_RADIUS := 84.0
 const SPAWN_SPREAD := 8.0
 const CLASH_DICE_COUNT := 3
 
+## The QUANTITY phase used to let the player drag-pick a dice count via a
+## DiceCountSelector living inside the tray. That selector never fit the
+## tray well and is being redesigned separately (see DiceCountSelector.gd) -
+## for now QUANTITY just auto-rolls a fixed number of dice immediately
+## after a unit is drafted, so a single roll takes you straight from
+## "click the felt" to "units marching down the path".
+const QUANTITY_DICE_COUNT := 3
+
 ## Dice were built for a full-size scene - shrink them to fit inside the
 ## small felt-bowl viewport no matter how many are thrown at once (1-6).
 ## Scale shrinks as count grows instead of using one fixed size, so a
@@ -71,8 +79,6 @@ const RARITY_COLORS := [
 	Color(1.0, 0.84, 0.2),
 ]
 
-@onready var selector: DiceCountSelector = $DiceCountSelector
-
 var phase: Phase = Phase.TYPE
 var rolled_values: Array[int] = []
 var rolled_rarities: Array[int] = []
@@ -103,7 +109,6 @@ func set_march_side(side: String) -> void:
 
 
 func _ready() -> void:
-	selector.count_selected.connect(_on_count_selected)
 	_build_tray_walls()
 	_enter_phase(Phase.TYPE)
 
@@ -151,12 +156,9 @@ func _enter_phase(new_phase: Phase) -> void:
 			if unit_icon:
 				unit_icon.queue_free()
 				unit_icon = null
-			selector.visible = false
 		Phase.QUANTITY:
-			selector.visible = true
-			selector.max_count = clampi(wave + 1, 1, 6)
+			_spawn_dice(QUANTITY_DICE_COUNT, Die.NUMBER_ROW, true)
 		Phase.CLASH:
-			selector.visible = false
 			_spawn_dice(CLASH_DICE_COUNT, Die.ICON_ROW, true)
 
 
@@ -197,13 +199,6 @@ func _input(event: InputEvent) -> void:
 
 	if phase == Phase.TYPE:
 		_spawn_dice(2, Die.NUMBER_ROW, false, true)
-
-
-func _on_count_selected(count: int) -> void:
-	if phase != Phase.QUANTITY:
-		return
-	_clear_result_icons()
-	_spawn_dice(count, Die.NUMBER_ROW, true)
 
 
 func _spawn_dice(count: int, row: int, use_rarity: bool, track_as_type: bool = false) -> void:
@@ -257,7 +252,6 @@ func _on_die_result_locked(value: int, rarity: int) -> void:
 				var v: int = rolled_values[i]
 				quantity_by_rarity[r] = quantity_by_rarity.get(r, 0) + v
 			_spawn_drafted_units()
-			selector.visible = false
 			awaiting_advance = true
 
 		Phase.CLASH:
