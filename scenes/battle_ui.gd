@@ -18,12 +18,18 @@ extends CanvasLayer
 const PATH_DIM := Color(0.55, 0.55, 0.55, 1.0)
 const PATH_LIT := Color(1, 1, 1, 1)
 
+## Built lazily in _build_ledger_ui() rather than existing in
+## battle_ui.tscn - see that function for why.
+var ledger_panel: PanelContainer
+var ledger_label: Label
+
 
 func _ready() -> void:
 	roll_button.pressed.connect(_on_roll_button_pressed)
 	path_left_button.pressed.connect(_on_path_left_pressed)
 	path_right_button.pressed.connect(_on_path_right_pressed)
 	_build_hud_labels()
+	_build_ledger_ui()
 	_update_path_highlight()
 
 
@@ -60,3 +66,34 @@ func _build_hud_labels() -> void:
 	banner.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	banner.add_theme_font_size_override("font_size", 28)
 	ui_root.add_child(banner)
+
+
+## The "roll ledger" from the design doc - a clickable sheet showing which
+## dice-sum ranges currently draft which units. Built here at runtime
+## rather than as nodes in battle_ui.tscn since its whole point is to
+## reflect main.gd's live pools/names (see get_ledger_rows()) rather than
+## static scene content - there's nothing meaningful to hand-author.
+func _build_ledger_ui() -> void:
+	var button := Button.new()
+	button.name = "LedgerButton"
+	button.text = "Ledger"
+	button.position = Vector2(16, 12)
+	button.size = Vector2(90, 32)
+	button.pressed.connect(_on_ledger_button_pressed)
+	ui_root.add_child(button)
+
+	ledger_panel = PanelContainer.new()
+	ledger_panel.name = "LedgerPanel"
+	ledger_panel.position = Vector2(16, 52)
+	ledger_panel.visible = false
+	ui_root.add_child(ledger_panel)
+
+	ledger_label = Label.new()
+	ledger_label.add_theme_font_size_override("font_size", 16)
+	ledger_panel.add_child(ledger_label)
+
+
+func _on_ledger_button_pressed() -> void:
+	ledger_panel.visible = not ledger_panel.visible
+	if ledger_panel.visible:
+		ledger_label.text = "\n".join(dice_roller.get_ledger_rows())

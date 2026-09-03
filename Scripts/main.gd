@@ -69,6 +69,16 @@ enum Phase { TYPE, QUANTITY, CLASH }
 @export var rare_icons: Array[Texture2D] = []
 @export var common_icons: Array[Texture2D] = []
 
+## Display names for the roll ledger (see get_ledger_rows() below), index
+## for index against boss_icon/rare_icons/common_icons. Left empty by
+## default rather than hardcoded here - fill these in from the Inspector
+## to name the ledger's units without touching code, per the design doc's
+## "player wants choice over which units populate the ledger" note. Any
+## icon without a matching name falls back to a numbered placeholder.
+@export var boss_name: String = "Boss"
+@export var rare_names: Array[String] = []
+@export var common_names: Array[String] = []
+
 const SUM_TO_RANGE := {
 	2: "boss",
 	3: "rare", 4: "rare",
@@ -278,6 +288,49 @@ func _pool_for_range(range_key: String) -> Array[Texture2D]:
 			return rare_icons
 		_:
 			return common_icons
+
+
+## Player-facing summary of which TYPE-roll (2d6 sum) ranges currently
+## draft which units - the "roll ledger" from the design doc. Rebuilt on
+## demand (see battle_ui.gd's ledger button) rather than cached, so it
+## always reflects whatever's actually in the pools right now instead of
+## going stale if the pools change mid-run.
+func get_ledger_rows() -> Array[String]:
+	var rows: Array[String] = []
+	var range_start := 2
+	var current_key: String = SUM_TO_RANGE.get(2, "common")
+	for sum in range(3, 13):
+		var key: String = SUM_TO_RANGE.get(sum, "common")
+		if key != current_key:
+			rows.append(_format_ledger_row(range_start, sum - 1, current_key))
+			range_start = sum
+			current_key = key
+	rows.append(_format_ledger_row(range_start, 12, current_key))
+	return rows
+
+
+func _format_ledger_row(low: int, high: int, range_key: String) -> String:
+	var sum_label := "%d" % low if low == high else "%d-%d" % [low, high]
+	var names := _names_for_range(range_key)
+	var names_text := ", ".join(names) if not names.is_empty() else "(none set)"
+	return "%s (%s): %s" % [sum_label, range_key.capitalize(), names_text]
+
+
+func _names_for_range(range_key: String) -> Array[String]:
+	match range_key:
+		"boss":
+			return [boss_name] if boss_icon else []
+		"rare":
+			return rare_names if rare_names.size() == rare_icons.size() else _placeholder_names(rare_icons.size())
+		_:
+			return common_names if common_names.size() == common_icons.size() else _placeholder_names(common_icons.size())
+
+
+func _placeholder_names(count: int) -> Array[String]:
+	var names: Array[String] = []
+	for i in count:
+		names.append("Unit %d" % (i + 1))
+	return names
 
 
 func _show_unit_icon(texture: Texture2D) -> void:
