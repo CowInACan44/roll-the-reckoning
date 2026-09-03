@@ -1,9 +1,10 @@
 extends CanvasLayer
 
-## Full-screen HUD layer. Owns the wave/village-HP labels and the win/lose
-## banner. Scripts/main.gd (the dice roller, living inside the small
-## SubViewport dice tray) reaches these through the "battle_hud" group and
-## updates them by node name - see main.gd's _get_hud()/_update_hud().
+## Full-screen HUD layer. Owns the win/lose banner (currently unused - it
+## was set by the now-cut CLASH phase's _end_run()). Scripts/main.gd (the
+## dice roller, living inside the small SubViewport dice tray) reaches it
+## through the "battle_hud" group and updates it by node name - see
+## main.gd's _get_hud().
 
 @onready var dice_roller: Node2D = $UIRoot/TrayAnchor/DiceRollerContainer/DiceRollerViewport/DiceRoller
 @onready var roll_button: Button = $UIRoot/RollButton
@@ -48,21 +49,11 @@ func _update_path_highlight() -> void:
 	path_right.modulate = PATH_LIT if dice_roller.march_side == "right" else PATH_DIM
 
 
+## Wave/village-HP labels used to live here, driven by the CLASH phase's
+## _resolve_clash(). CLASH is cut from the active loop for now (see
+## main.gd's Phase enum comment) - it never updates them anymore - so
+## they're left out rather than sitting on screen frozen at "Wave 1/5".
 func _build_hud_labels() -> void:
-	var wave_label := Label.new()
-	wave_label.name = "WaveLabel"
-	wave_label.position = Vector2(16, 12)
-	wave_label.text = "Wave 1/5"
-	wave_label.add_theme_font_size_override("font_size", 22)
-	ui_root.add_child(wave_label)
-
-	var hp_label := Label.new()
-	hp_label.name = "VillageHPLabel"
-	hp_label.position = Vector2(16, 44)
-	hp_label.text = "Village HP: 20/20"
-	hp_label.add_theme_font_size_override("font_size", 22)
-	ui_root.add_child(hp_label)
-
 	var banner := Label.new()
 	banner.name = "ResultBanner"
 	banner.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP, Control.PRESET_MODE_MINSIZE, 24)

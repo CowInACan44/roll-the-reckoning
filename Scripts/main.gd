@@ -40,9 +40,13 @@ const MAX_UNITS_PER_DRAFT := 8  # keeps a single draft's march readable; tune fr
 const WAVE_COUNT := 5
 const MAX_VILLAGE_HP := 20
 
-## First-draft CLASH resolution rules. The concept doc marks the exact
-## clash format as still undecided - treat these numbers as placeholders
-## to rebalance once the real rules are nailed down, not a final design.
+## First-draft CLASH resolution rules. CLASH is cut from the active phase
+## loop for now (see the Phase enum below) to get the core roll -> unit ->
+## march loop working first; this and the functions below it
+## (_resolve_clash, _show_clash_results, _roll_defender_rarity, _end_run)
+## are dead code until CLASH is reworked and wired back in. Left in place
+## rather than deleted since the concept doc marks the exact clash format
+## as still undecided anyway - treat these numbers as placeholders.
 const CLASH_SIEGE_DAMAGE := {
 	# icon index (matches ICON_NAMES) -> village HP lost if the summoned
 	# monsters win that lane's rarity contest against the defenders
@@ -55,6 +59,10 @@ const CLASH_SIEGE_DAMAGE := {
 }
 const DEFENDER_WIN_HEAL := 1  # village HP recovered per lane the defenders win
 
+## CLASH is never entered right now - _input()/trigger_roll() send
+## QUANTITY straight back to TYPE. Kept in the enum (rather than removed)
+## because _enter_phase() and _on_die_result_locked() still have a
+## Phase.CLASH case ready for when the mechanic gets reworked.
 enum Phase { TYPE, QUANTITY, CLASH }
 
 @export var boss_icon: Texture2D
@@ -192,8 +200,6 @@ func _input(event: InputEvent) -> void:
 	if awaiting_advance:
 		awaiting_advance = false
 		if phase == Phase.QUANTITY:
-			_enter_phase(Phase.CLASH)
-		elif phase == Phase.CLASH:
 			_enter_phase(Phase.TYPE)
 		return
 
@@ -451,8 +457,6 @@ func trigger_roll() -> void:
 	if awaiting_advance:
 		awaiting_advance = false
 		if phase == Phase.QUANTITY:
-			_enter_phase(Phase.CLASH)
-		elif phase == Phase.CLASH:
 			_enter_phase(Phase.TYPE)
 		return
 
