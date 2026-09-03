@@ -2,8 +2,8 @@
 
 [ext_resource type="Script" uid="uid://hyjxidpn3tn4" path="res://scenes/battle_ui.gd" id="1_1m1i6"]
 [ext_resource type="Texture2D" uid="uid://c0nbfqi3ad4rj" path="res://ui/DiceTray.png" id="1_lgetq"]
-[ext_resource type="Texture2D" uid="uid://da6fmagfdwbg8" path="res://ui/pathtrack.png" id="2_gvrrm"]
 [ext_resource type="Script" uid="uid://c1xf4cb625rsy" path="res://Scripts/main.gd" id="1_wvifm"]
+[ext_resource type="Texture2D" uid="uid://da6fmagfdwbg8" path="res://ui/pathtrack.png" id="2_gvrrm"]
 [ext_resource type="Texture2D" uid="uid://jufsf8r17bnf" path="res://Tiny/Tiny Swords (Free Pack)/UI Elements/UI from the page/Enemy Avatars/Enemy Avatars_16.png" id="3_bw04g"]
 [ext_resource type="Texture2D" uid="uid://bhvgjojid5r0w" path="res://Tiny/Tiny Swords (Free Pack)/UI Elements/UI from the page/Enemy Avatars/Enemy Avatars_11.png" id="4_1m1i6"]
 [ext_resource type="Texture2D" uid="uid://clpu3r4fbgnxd" path="res://Tiny/Tiny Swords (Free Pack)/UI Elements/UI from the page/Enemy Avatars/Enemy Avatars_10.png" id="5_hnkxu"]
@@ -28,11 +28,10 @@ _data = {
 }
 point_count = 2
 
-[node name="BattleUI" type="CanvasLayer"]
+[node name="BattleUI" type="CanvasLayer" unique_id=888055000]
 script = ExtResource("1_1m1i6")
 
-[node name="UIRoot" type="Control" parent="."]
-groups=PackedStringArray("battle_hud")
+[node name="UIRoot" type="Control" parent="." unique_id=616998159]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -40,8 +39,9 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="TrayAnchor" type="Control" parent="UIRoot"]
+[node name="TrayAnchor" type="Control" parent="UIRoot" unique_id=513916492]
 layout_mode = 1
+anchors_preset = 7
 anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
@@ -49,65 +49,75 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 0
 
-[node name="PathLeft" type="Sprite2D" parent="UIRoot/TrayAnchor"]
-position = Vector2(-342, -55)
-scale = Vector2(0.67, 0.7)
+[node name="PathLeft" type="Sprite2D" parent="UIRoot/TrayAnchor" unique_id=2052504952]
+position = Vector2(-341.49997, -64.57499)
+scale = Vector2(0.8759233, 0.648103)
 texture = ExtResource("2_gvrrm")
 
-[node name="PathtRight" type="Sprite2D" parent="UIRoot/TrayAnchor"]
-position = Vector2(342, -55)
-scale = Vector2(0.67, 0.7)
+[node name="PathtRight" type="Sprite2D" parent="UIRoot/TrayAnchor" unique_id=1493412936]
+position = Vector2(347.50003, -63.575)
+scale = Vector2(0.8700147, 0.653523)
 texture = ExtResource("2_gvrrm")
 flip_h = true
 
-[node name="PathLeftButton" type="Button" parent="UIRoot/TrayAnchor"]
-position = Vector2(-569, -184)
-size = Vector2(454, 258)
+[node name="PathLeftButton" type="Button" parent="UIRoot/TrayAnchor" unique_id=317409787]
+layout_mode = 0
+offset_left = -569.0
+offset_top = -184.0
+offset_right = -115.0
+offset_bottom = 74.0
 focus_mode = 0
 flat = true
-text = ""
 
-[node name="PathRightButton" type="Button" parent="UIRoot/TrayAnchor"]
-position = Vector2(115, -184)
-size = Vector2(454, 258)
+[node name="PathRightButton" type="Button" parent="UIRoot/TrayAnchor" unique_id=1975063577]
+layout_mode = 0
+offset_left = 115.0
+offset_top = -184.0
+offset_right = 569.0
+offset_bottom = 74.0
 focus_mode = 0
 flat = true
-text = ""
 
-[node name="DiceTray" type="Sprite2D" parent="UIRoot/TrayAnchor"]
-position = Vector2(0, -126)
-scale = Vector2(0.55, 0.55)
+[node name="DiceTray" type="Sprite2D" parent="UIRoot/TrayAnchor" unique_id=671186874]
+position = Vector2(0, -103.24999)
+scale = Vector2(0.55, 0.459)
 texture = ExtResource("1_lgetq")
 
-[node name="DiceRollerContainer" type="SubViewportContainer" parent="UIRoot/TrayAnchor"]
-position = Vector2(-94, -218)
-size = Vector2(188, 188)
+[node name="DiceRollerContainer" type="SubViewportContainer" parent="UIRoot/TrayAnchor" unique_id=609493136]
+layout_mode = 0
+offset_left = -95.0
+offset_top = -200.0
+offset_right = 93.0
+offset_bottom = -12.0
 mouse_filter = 2
 stretch = true
 
 [node name="FeltClickButton" type="Button" parent="UIRoot/TrayAnchor"]
-position = Vector2(-94, -218)
-size = Vector2(188, 188)
+layout_mode = 0
+offset_left = -95.0
+offset_top = -200.0
+offset_right = 93.0
+offset_bottom = -12.0
 focus_mode = 0
 flat = true
 modulate = Color(1, 1, 1, 0)
-text = ""
 
-[node name="DiceRollerViewport" type="SubViewport" parent="UIRoot/TrayAnchor/DiceRollerContainer"]
+[node name="DiceRollerViewport" type="SubViewport" parent="UIRoot/TrayAnchor/DiceRollerContainer" unique_id=2014231632]
 transparent_bg = true
 handle_input_locally = false
 canvas_item_default_texture_filter = 0
 size = Vector2i(188, 188)
 render_target_update_mode = 4
 
-[node name="DiceRoller" type="Node2D" parent="UIRoot/TrayAnchor/DiceRollerContainer/DiceRollerViewport"]
+[node name="DiceRoller" type="Node2D" parent="UIRoot/TrayAnchor/DiceRollerContainer/DiceRollerViewport" unique_id=65120697]
+position = Vector2(6, 23)
 script = ExtResource("1_wvifm")
 boss_icon = ExtResource("3_bw04g")
 rare_icons = Array[Texture2D]([ExtResource("4_1m1i6"), ExtResource("5_hnkxu"), ExtResource("6_6jbvb"), ExtResource("7_y8ss2"), ExtResource("8_emian")])
 common_icons = Array[Texture2D]([ExtResource("9_k0kd0"), ExtResource("10_ms1mg"), ExtResource("11_wuh40"), ExtResource("12_eo00v"), ExtResource("13_3a1b4")])
 
-[node name="MarchTrackLeft" type="Path2D" parent="UIRoot/TrayAnchor"]
+[node name="MarchTrackLeft" type="Path2D" parent="UIRoot/TrayAnchor" unique_id=1390378316]
 curve = SubResource("Curve2D_left")
 
-[node name="MarchTrackRight" type="Path2D" parent="UIRoot/TrayAnchor"]
+[node name="MarchTrackRight" type="Path2D" parent="UIRoot/TrayAnchor" unique_id=556810328]
 curve = SubResource("Curve2D_right")
