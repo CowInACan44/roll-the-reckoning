@@ -120,6 +120,15 @@ var drafted_texture: Texture2D = null
 
 var awaiting_advance := false
 
+## True from the moment a TYPE roll is triggered until QUANTITY's dice lock
+## and awaiting_advance goes true - i.e. exactly the window where dice are
+## actually tumbling and no new roll should be startable. Without this,
+## clicking the felt again while TYPE (or QUANTITY) dice were still rolling
+## called _spawn_dice() again on top of the still-active ones - dice_expected/
+## rolled_values got reset out from under the in-flight roll, and the tray
+## filled up with orphaned extra dice from every extra click.
+var rolling := false
+
 var wave := 1
 var village_hp := MAX_VILLAGE_HP
 var run_over := false
@@ -220,7 +229,8 @@ func _input(event: InputEvent) -> void:
 			_enter_phase(Phase.TYPE)
 		return
 
-	if phase == Phase.TYPE:
+	if phase == Phase.TYPE and not rolling:
+		rolling = true
 		_spawn_dice(2, Die.NUMBER_ROW, false, true)
 
 
@@ -278,12 +288,14 @@ func _on_die_result_locked(value: int, rarity: int) -> void:
 				quantity_by_rarity[r] = quantity_by_rarity.get(r, 0) + v
 			_spawn_drafted_units()
 			awaiting_advance = true
+			rolling = false
 
 		Phase.CLASH:
 			_show_clash_results()
 			_resolve_clash()
 			if not run_over:
 				awaiting_advance = true
+				rolling = false
 
 
 func _pool_for_range(range_key: String) -> Array[Texture2D]:
@@ -557,5 +569,6 @@ func trigger_roll() -> void:
 			_enter_phase(Phase.TYPE)
 		return
 
-	if phase == Phase.TYPE:
+	if phase == Phase.TYPE and not rolling:
+		rolling = true
 		_spawn_dice(2, Die.NUMBER_ROW, false, true)

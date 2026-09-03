@@ -60,14 +60,20 @@ func set_icon_texture(texture: Texture2D) -> void:
 
 
 ## Mirrors the token so it visually faces the direction it's marching -
-## true faces left, false faces right. Verified live against the actual
-## avatar art that its default (unflipped) orientation already faces left,
-## so facing right is what needs the flip, not the other way around.
+## true faces left, false faces right.
+##
+## The Enemy Avatars pool isn't a consistent set - most are clearly
+## directional (visible mouth/teeth), a few are close to radially
+## symmetric. Checked all 11 directly: the previous version of this
+## function was calibrated against Enemy Avatars_11.png (a near-symmetric
+## spiky ball), which was ambiguous enough to read backwards - the clearly
+## directional icons in the pool (visible teeth/snout) default-face
+## *right*, not left. Re-verified against one of those instead.
 func set_facing_left(facing_left: bool) -> void:
 	if icon:
-		icon.flip_h = not facing_left
+		icon.flip_h = facing_left
 	if stick:
-		stick.flip_h = not facing_left
+		stick.flip_h = facing_left
 
 
 func _process(delta: float) -> void:
