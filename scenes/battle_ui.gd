@@ -15,6 +15,9 @@ extends CanvasLayer
 @onready var path_left_button: Button = $UIRoot/TrayAnchor/PathLeftButton
 @onready var path_right_button: Button = $UIRoot/TrayAnchor/PathRightButton
 
+@onready var march_track_left: Path2D = $UIRoot/TrayAnchor/MarchTrackLeft
+@onready var march_track_right: Path2D = $UIRoot/TrayAnchor/MarchTrackRight
+
 const PATH_DIM := Color(0.55, 0.55, 0.55, 1.0)
 const PATH_LIT := Color(1, 1, 1, 1)
 
@@ -28,6 +31,14 @@ func _ready() -> void:
 	roll_button.pressed.connect(_on_roll_button_pressed)
 	path_left_button.pressed.connect(_on_path_left_pressed)
 	path_right_button.pressed.connect(_on_path_right_pressed)
+	# Hand the march tracks to the dice roller directly rather than having
+	# it discover them via get_tree().get_nodes_in_group("march_track") -
+	# a node's `groups=PackedStringArray(...)` .tscn property turned out to
+	# not register at all under the Godot build this was verified against
+	# (confirmed with a minimal throwaway scene, so it's not specific to
+	# these nodes), so group lookup for this can't be relied on.
+	dice_roller.march_track_left = march_track_left
+	dice_roller.march_track_right = march_track_right
 	_build_hud_labels()
 	_build_ledger_ui()
 	_update_path_highlight()

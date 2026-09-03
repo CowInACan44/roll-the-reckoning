@@ -225,7 +225,9 @@ func _spawn_dice(count: int, row: int, use_rarity: bool, track_as_type: bool = f
 	for i in count:
 		var die: Die = DIE_SCENE.instantiate()
 		add_child(die)
-		die.scale = Vector2(die_scale, die_scale)
+		# Not die.scale = ... - see Die.set_visual_scale()'s comment for why
+		# scaling a RigidBody2D directly doesn't stick.
+		die.set_visual_scale(die_scale)
 		if track_as_type:
 			type_dice.append(die)
 		else:
@@ -364,12 +366,13 @@ func _spawn_drafted_units() -> void:
 
 
 ## Spawns a UnitToken on the march track (which lives in a totally
-## different scene/viewport, found via group membership) and tweens it
-## across over MARCH_DURATION, then hands it off to _on_march_finished.
+## different scene/viewport - see march_track_left/right below for how we
+## reach it) and tweens it across over MARCH_DURATION, then hands it off to
+## _on_march_finished.
 func _spawn_marching_token(texture: Texture2D, rarity: int, start_delay: float = 0.0) -> void:
 	var track := _get_march_track()
 	if track == null:
-		push_warning("No node in group 'march_track' - did you add MarchTrackLeft/MarchTrackRight to it?")
+		push_warning("march_track_left/march_track_right are both unset - did battle_ui.gd's _ready() wire them up?")
 		return
 	var follow := PathFollow2D.new()
 	follow.rotates = false
@@ -387,18 +390,19 @@ func _spawn_marching_token(texture: Texture2D, rarity: int, start_delay: float =
 	tween.finished.connect(_on_march_finished.bind(follow))
 
 
-## Both MarchTrackLeft and MarchTrackRight are tagged "march_track" - pick
-## the one matching march_side, falling back to whichever is found first
-## if the named one is missing (so a scene without both still works).
+## Handed to us directly by battle_ui.gd's _ready() rather than discovered
+## via get_tree().get_nodes_in_group("march_track") - a node's
+## `groups=PackedStringArray(...)` .tscn property was verified (against a
+## minimal throwaway scene, so it's not specific to these two nodes) to not
+## register at all under the Godot build this was checked against, so group
+## lookup can't be relied on for this.
+var march_track_left: Path2D = null
+var march_track_right: Path2D = null
+
+
 func _get_march_track() -> Path2D:
-	var target_name := "MarchTrackLeft" if march_side == "left" else "MarchTrackRight"
-	var fallback: Path2D = null
-	for node in get_tree().get_nodes_in_group("march_track"):
-		if node.name == target_name:
-			return node as Path2D
-		if fallback == null:
-			fallback = node as Path2D
-	return fallback
+	var target := march_track_left if march_side == "left" else march_track_right
+	return target if target != null else (march_track_right if march_track_left == null else march_track_left)
 
 
 ## A token reached the end of the screen-space march track and vanishes.

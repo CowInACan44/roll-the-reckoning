@@ -47,6 +47,7 @@ var _roll_elapsed := 0.0
 @onready var numeral: Sprite2D = $NumeralSprite
 @onready var roll_timer: Timer = $RollTimer
 @onready var roll_sound: AudioStreamPlayer = $RollSound
+@onready var collision: CollisionShape2D = $CollisionShape2D
 
 var roll_sounds: Array[AudioStream] = [
 	preload("res://dice/d6/Roll 1d6.wav"),
@@ -74,6 +75,19 @@ func _ready() -> void:
 
 	roll_timer.wait_time = ROLL_TICK
 	roll_timer.timeout.connect(_on_roll_timer_timeout)
+
+
+## Sets how big this die renders and collides. Scales tumble/numeral/collision
+## individually rather than the Die (RigidBody2D) node's own `scale` -
+## RigidBody2D re-derives its global transform from the physics server every
+## physics step, and the physics server has no concept of Node2D scale, so a
+## scale set on the body itself gets silently reset to 1.0 on the next
+## physics tick no matter when it's set. Scaling the (non-physics) children
+## instead sticks, and still correctly shrinks the actual collision shape.
+func set_visual_scale(s: float) -> void:
+	tumble.scale = Vector2(s, s)
+	numeral.scale = Vector2(s, s)
+	collision.scale = Vector2(s, s)
 
 
 func summon(at_position: Vector2, dice_count: int = 1, row: int = NUMBER_ROW, use_rarity: bool = false) -> void:
