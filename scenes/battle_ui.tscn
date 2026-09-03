@@ -61,6 +61,20 @@ scale = Vector2(0.7, 0.7)
 texture = ExtResource("2_gvrrm")
 flip_h = true
 
+[node name="PathLeftButton" type="Button" parent="UIRoot/TrayAnchor"]
+position = Vector2(-557, -184)
+size = Vector2(474, 258)
+focus_mode = 0
+flat = true
+text = ""
+
+[node name="PathRightButton" type="Button" parent="UIRoot/TrayAnchor"]
+position = Vector2(83, -184)
+size = Vector2(474, 258)
+focus_mode = 0
+flat = true
+text = ""
+
 [node name="DiceTray" type="Sprite2D" parent="UIRoot/TrayAnchor"]
 position = Vector2(0, -108)
 scale = Vector2(0.4, 0.4)
@@ -92,6 +106,7 @@ groups=PackedStringArray("march_track")
 curve = SubResource("Curve2D_left")
 
 [node name="MarchTrackRight" type="Path2D" parent="UIRoot/TrayAnchor"]
+groups=PackedStringArray("march_track")
 curve = SubResource("Curve2D_right")
 
 [node name="RollButton" type="Button" parent="UIRoot"]

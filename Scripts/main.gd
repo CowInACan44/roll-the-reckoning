@@ -84,6 +84,14 @@ var wave := 1
 var village_hp := MAX_VILLAGE_HP
 var run_over := false
 
+## Which portal the next draft marches out of - "left" or "right". Set by
+## the player clicking a path in battle_ui.gd (PathLeftButton/PathRightButton).
+var march_side := "left"
+
+
+func set_march_side(side: String) -> void:
+	march_side = side
+
 
 func _ready() -> void:
 	selector.count_selected.connect(_on_count_selected)
@@ -288,9 +296,9 @@ func _spawn_drafted_units() -> void:
 ## different scene/viewport, found via group membership) and tweens it
 ## across over MARCH_DURATION, then hands it off to _on_march_finished.
 func _spawn_marching_token(texture: Texture2D, rarity: int, start_delay: float = 0.0) -> void:
-	var track: Path2D = get_tree().get_first_node_in_group("march_track")
+	var track := _get_march_track()
 	if track == null:
-		push_warning("No node in group 'march_track' - did you add MarchTrack to it?")
+		push_warning("No node in group 'march_track' - did you add MarchTrackLeft/MarchTrackRight to it?")
 		return
 	var follow := PathFollow2D.new()
 	follow.rotates = false
@@ -306,6 +314,20 @@ func _spawn_marching_token(texture: Texture2D, rarity: int, start_delay: float =
 	tween.tween_interval(start_delay)
 	tween.tween_property(follow, "progress_ratio", 1.0, MARCH_DURATION)
 	tween.finished.connect(_on_march_finished.bind(follow))
+
+
+## Both MarchTrackLeft and MarchTrackRight are tagged "march_track" - pick
+## the one matching march_side, falling back to whichever is found first
+## if the named one is missing (so a scene without both still works).
+func _get_march_track() -> Path2D:
+	var target_name := "MarchTrackLeft" if march_side == "left" else "MarchTrackRight"
+	var fallback: Path2D = null
+	for node in get_tree().get_nodes_in_group("march_track"):
+		if node.name == target_name:
+			return node as Path2D
+		if fallback == null:
+			fallback = node as Path2D
+	return fallback
 
 
 ## A token reached the end of the screen-space march track and vanishes.
