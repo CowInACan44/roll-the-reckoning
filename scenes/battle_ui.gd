@@ -5,7 +5,7 @@ extends CanvasLayer
 ## SubViewport dice tray) reaches these through the "battle_hud" group and
 ## updates them by node name - see main.gd's _get_hud()/_update_hud().
 
-@onready var dice_roller: Node2D = $UIRoot/DiceRollerContainer/DiceRollerViewport/DiceRoller
+@onready var dice_roller: Node2D = $UIRoot/TrayAnchor/DiceRollerContainer/DiceRollerViewport/DiceRoller
 @onready var roll_button: Button = $UIRoot/RollButton
 @onready var ui_root: Control = $UIRoot
 
