@@ -413,6 +413,7 @@ func _spawn_marching_token(texture: Texture2D, rarity: int, start_delay: float =
 	var token: UnitToken = UNIT_TOKEN_SCENE.instantiate()
 	follow.add_child(token)
 	token.set_icon_texture(texture)
+	token.set_facing_left(march_side == "left")
 	token.modulate = RARITY_COLORS[rarity]
 
 	var tween := create_tween()

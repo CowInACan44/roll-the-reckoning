@@ -59,6 +59,17 @@ func set_icon_texture(texture: Texture2D) -> void:
 		icon.texture = texture
 
 
+## Mirrors the token so it visually faces the direction it's marching -
+## true faces left, false faces right. Verified live against the actual
+## avatar art that its default (unflipped) orientation already faces left,
+## so facing right is what needs the flip, not the other way around.
+func set_facing_left(facing_left: bool) -> void:
+	if icon:
+		icon.flip_h = not facing_left
+	if stick:
+		stick.flip_h = not facing_left
+
+
 func _process(delta: float) -> void:
 	if Engine.is_editor_hint():
 		return  # don't bob while editing in the viewport, only at runtime
