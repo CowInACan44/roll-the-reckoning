@@ -4,13 +4,17 @@ class_name DiceCountSelector
 ## A row of 6 pip-face icons (from UpscaledDice_White.png row 0, 112x112
 ## cells). Drag across them to preview a count, release to confirm.
 ## No text anywhere - the player sees which icons light up and picks by feel.
+##
+## Sized to fit inside the dice tray's felt circle (see main.gd's
+## FELT_RADIUS) - the whole 6-icon row must be narrower than the felt's
+## diameter, with room either side for the drag-hover margin below.
 
 signal count_selected(count: int)
 
 const CELL_SIZE := Vector2(112, 112)
 const PIP_ROW := 0
-const ICON_SCALE := Vector2(0.6, 0.6)
-const ICON_SPACING := 80.0
+const ICON_SCALE := Vector2(0.16, 0.16)
+const ICON_SPACING := 22.0
 
 const DIM_COLOR := Color(0.35, 0.35, 0.35, 0.6)
 const LIT_COLOR := Color(1, 1, 1, 1)
@@ -66,7 +70,7 @@ func _update_hover(global_mouse_pos: Vector2) -> void:
 
 	# Only register as "over the selector" if reasonably close to the row.
 	var local_y := to_local(global_mouse_pos).y
-	if abs(local_y) > 40:
+	if abs(local_y) > 16:
 		_reset_highlight()
 		hovered_count = 0
 		return

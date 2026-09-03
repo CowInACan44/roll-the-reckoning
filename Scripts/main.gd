@@ -3,10 +3,19 @@ extends Node2D
 const DIE_SCENE := preload("res://scenes/Die.tscn")
 const UNIT_TOKEN_SCENE := preload("res://scenes/unit_token.tscn")
 
-## Center of the felt bowl inside the 200x190 DiceRollerViewport (see
+## Center of the felt bowl inside the 188x188 DiceRollerViewport (see
 ## battle_ui.tscn's DiceRollerContainer - it's sized/positioned to match
 ## the actual green circle in ui/DiceTray.png, not a round number).
-@export var spawn_area: Vector2 = Vector2(95, 90)
+@export var spawn_area: Vector2 = Vector2(94, 94)
+
+## Radius of that same green felt circle, in the same viewport-local
+## pixels as spawn_area. Everything that renders inside the tray (dice,
+## walls, the drafted-unit icon, the clash-result labels) sizes and
+## positions itself relative to this so nothing can render past the felt
+## and onto the wood border - see _build_tray_walls(), _show_unit_icon()
+## and _show_clash_results() below.
+const FELT_RADIUS := 84.0
+
 const SPAWN_SPREAD := 8.0
 const CLASH_DICE_COUNT := 3
 
@@ -14,8 +23,8 @@ const CLASH_DICE_COUNT := 3
 ## small felt-bowl viewport no matter how many are thrown at once (1-6).
 ## Scale shrinks as count grows instead of using one fixed size, so a
 ## single die and a full six-dice throw both stay inside the circle.
-const DICE_SCALE_BASE := 0.11
-const DICE_SCALE_MIN := 0.035
+const DICE_SCALE_BASE := 0.22
+const DICE_SCALE_MIN := 0.06
 
 const MARCH_DURATION := 3.0  # seconds for a token to cross the whole track
 const MAX_UNITS_PER_DRAFT := 8  # keeps a single draft's march readable; tune freely
@@ -99,13 +108,19 @@ func _ready() -> void:
 	_enter_phase(Phase.TYPE)
 
 
-## The tray is small (200x190) and dice fling at up to FLING_MAX px/s in
-## Die.gd, easily enough to sail past the felt's edge before damping pulls
-## them back. Box the roll area in with invisible walls so flung dice
-## bounce back into view instead of settling somewhere outside the tray.
+## The tray is small and dice fling at up to FLING_MAX px/s in Die.gd,
+## easily enough to sail past the felt's edge before damping pulls them
+## back. Box the roll area in with invisible walls so flung dice bounce
+## back into view instead of settling somewhere outside the tray.
+##
+## The box is a square *inscribed inside* the felt circle (half-extent =
+## radius / sqrt(2)) rather than one sized to the circle's bounding box -
+## a bounding-box wall lets dice settle in its corners, which sit outside
+## the round felt and on top of the wood border.
 func _build_tray_walls() -> void:
-	var half_extents := Vector2(70, 65)
-	var thickness := 20.0
+	var half_extent := FELT_RADIUS / sqrt(2.0)
+	var half_extents := Vector2(half_extent, half_extent)
+	var thickness := 14.0
 	_add_wall(spawn_area + Vector2(0, -half_extents.y), Vector2(half_extents.x * 2, thickness))
 	_add_wall(spawn_area + Vector2(0, half_extents.y), Vector2(half_extents.x * 2, thickness))
 	_add_wall(spawn_area + Vector2(-half_extents.x, 0), Vector2(thickness, half_extents.y * 2))
@@ -270,8 +285,11 @@ func _show_unit_icon(texture: Texture2D) -> void:
 		unit_icon.queue_free()
 	unit_icon = Sprite2D.new()
 	unit_icon.texture = texture
-	unit_icon.scale = Vector2(0.09, 0.09)  # source avatar art is 256x256 - shrink to fit the tray
-	unit_icon.position = spawn_area + Vector2(0, -55)
+	# Source avatar art is 256x256 - shrink so the icon's diameter is well
+	# inside FELT_RADIUS even with the -15px vertical offset below, instead
+	# of straddling the felt's edge and overlapping the wood border.
+	unit_icon.scale = Vector2(0.3, 0.3)
+	unit_icon.position = spawn_area + Vector2(0, -15)
 	add_child(unit_icon)
 
 
@@ -341,6 +359,14 @@ func _on_march_finished(follow: PathFollow2D) -> void:
 	follow.queue_free()
 
 
+## CLASH_DICE_COUNT labels laid out side by side. Each is sized and
+## center-anchored (rather than positioned by its top-left corner) so the
+## row can be placed by its centers and kept within FELT_RADIUS - the
+## previous fixed corner offsets pushed the outer labels well past the
+## felt and onto the wood tray.
+const CLASH_LABEL_SIZE := Vector2(70, 20)
+const CLASH_LABEL_SPACING := 40.0
+
 func _show_clash_results() -> void:
 	var index := 0
 	for i in rolled_values.size():
@@ -350,7 +376,11 @@ func _show_clash_results() -> void:
 		label.text = icon_name
 		label.add_theme_font_size_override("font_size", 12)
 		label.modulate = RARITY_COLORS[rarity]
-		label.position = spawn_area + Vector2(-65 + index * 45, -60)
+		label.size = CLASH_LABEL_SIZE
+		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		var offset_from_middle := (index - (rolled_values.size() - 1) / 2.0) * CLASH_LABEL_SPACING
+		var center := spawn_area + Vector2(offset_from_middle, -8)
+		label.position = center - CLASH_LABEL_SIZE / 2.0
 		add_child(label)
 		active_result_icons.append(label)
 		index += 1

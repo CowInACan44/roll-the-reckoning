@@ -19,13 +19,13 @@
 
 [sub_resource type="Curve2D" id="Curve2D_left"]
 _data = {
-"points": PackedVector2Array(0, 0, 0, 0, -90, -55, 0, 0, 0, 0, -600, -55)
+"points": PackedVector2Array(0, 0, 0, 0, -124, -55, 0, 0, 0, 0, -569, -55)
 }
 point_count = 2
 
 [sub_resource type="Curve2D" id="Curve2D_right"]
 _data = {
-"points": PackedVector2Array(0, 0, 0, 0, 90, -55, 0, 0, 0, 0, 600, -55)
+"points": PackedVector2Array(0, 0, 0, 0, 124, -55, 0, 0, 0, 0, 569, -55)
 }
 point_count = 2
 
@@ -51,38 +51,38 @@ grow_horizontal = 2
 grow_vertical = 0
 
 [node name="PathLeft" type="Sprite2D" parent="UIRoot/TrayAnchor"]
-position = Vector2(-320, -55)
-scale = Vector2(0.7, 0.7)
+position = Vector2(-342, -55)
+scale = Vector2(0.67, 0.7)
 texture = ExtResource("2_gvrrm")
 
 [node name="PathtRight" type="Sprite2D" parent="UIRoot/TrayAnchor"]
-position = Vector2(320, -55)
-scale = Vector2(0.7, 0.7)
+position = Vector2(342, -55)
+scale = Vector2(0.67, 0.7)
 texture = ExtResource("2_gvrrm")
 flip_h = true
 
 [node name="PathLeftButton" type="Button" parent="UIRoot/TrayAnchor"]
-position = Vector2(-557, -184)
-size = Vector2(474, 258)
+position = Vector2(-569, -184)
+size = Vector2(454, 258)
 focus_mode = 0
 flat = true
 text = ""
 
 [node name="PathRightButton" type="Button" parent="UIRoot/TrayAnchor"]
-position = Vector2(83, -184)
-size = Vector2(474, 258)
+position = Vector2(115, -184)
+size = Vector2(454, 258)
 focus_mode = 0
 flat = true
 text = ""
 
 [node name="DiceTray" type="Sprite2D" parent="UIRoot/TrayAnchor"]
-position = Vector2(0, -108)
-scale = Vector2(0.4, 0.4)
+position = Vector2(0, -126)
+scale = Vector2(0.55, 0.55)
 texture = ExtResource("1_lgetq")
 
 [node name="DiceRollerContainer" type="SubViewportContainer" parent="UIRoot/TrayAnchor"]
-position = Vector2(-100, -203)
-size = Vector2(200, 190)
+position = Vector2(-94, -218)
+size = Vector2(188, 188)
 mouse_filter = 2
 stretch = true
 
@@ -90,7 +90,7 @@ stretch = true
 transparent_bg = true
 handle_input_locally = false
 canvas_item_default_texture_filter = 0
-size = Vector2i(200, 190)
+size = Vector2i(188, 188)
 render_target_update_mode = 4
 
 [node name="DiceRoller" type="Node2D" parent="UIRoot/TrayAnchor/DiceRollerContainer/DiceRollerViewport"]
@@ -100,6 +100,7 @@ rare_icons = Array[Texture2D]([ExtResource("4_1m1i6"), ExtResource("5_hnkxu"), E
 common_icons = Array[Texture2D]([ExtResource("9_k0kd0"), ExtResource("10_ms1mg"), ExtResource("11_wuh40"), ExtResource("12_eo00v"), ExtResource("13_3a1b4")])
 
 [node name="DiceCountSelector" parent="UIRoot/TrayAnchor/DiceRollerContainer/DiceRollerViewport/DiceRoller" instance=ExtResource("2_lgetq")]
+position = Vector2(39, 114)
 
 [node name="MarchTrackLeft" type="Path2D" parent="UIRoot/TrayAnchor"]
 groups=PackedStringArray("march_track")
@@ -116,9 +117,9 @@ anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
 offset_left = -40.0
-offset_top = -250.0
+offset_top = -296.0
 offset_right = 40.0
-offset_bottom = -214.0
+offset_bottom = -260.0
 grow_horizontal = 2
 grow_vertical = 0
 text = "Roll"
