@@ -99,23 +99,7 @@ rare_icons = Array[Texture2D]([ExtResource("4_1m1i6"), ExtResource("5_hnkxu"), E
 common_icons = Array[Texture2D]([ExtResource("9_k0kd0"), ExtResource("10_ms1mg"), ExtResource("11_wuh40"), ExtResource("12_eo00v"), ExtResource("13_3a1b4")])
 
 [node name="MarchTrackLeft" type="Path2D" parent="UIRoot/TrayAnchor"]
-groups=PackedStringArray("march_track")
 curve = SubResource("Curve2D_left")
 
 [node name="MarchTrackRight" type="Path2D" parent="UIRoot/TrayAnchor"]
-groups=PackedStringArray("march_track")
 curve = SubResource("Curve2D_right")
-
-[node name="RollButton" type="Button" parent="UIRoot"]
-layout_mode = 1
-anchor_left = 0.5
-anchor_top = 1.0
-anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -40.0
-offset_top = -296.0
-offset_right = 40.0
-offset_bottom = -260.0
-grow_horizontal = 2
-grow_vertical = 0
-text = "Roll"

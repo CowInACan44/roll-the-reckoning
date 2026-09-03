@@ -7,7 +7,6 @@ extends CanvasLayer
 ## main.gd's _get_hud().
 
 @onready var dice_roller: Node2D = $UIRoot/TrayAnchor/DiceRollerContainer/DiceRollerViewport/DiceRoller
-@onready var roll_button: Button = $UIRoot/RollButton
 @onready var ui_root: Control = $UIRoot
 
 @onready var path_left: Sprite2D = $UIRoot/TrayAnchor/PathLeft
@@ -28,7 +27,6 @@ var ledger_label: Label
 
 
 func _ready() -> void:
-	roll_button.pressed.connect(_on_roll_button_pressed)
 	path_left_button.pressed.connect(_on_path_left_pressed)
 	path_right_button.pressed.connect(_on_path_right_pressed)
 	# Hand the march tracks to the dice roller directly rather than having
@@ -42,10 +40,6 @@ func _ready() -> void:
 	_build_hud_labels()
 	_build_ledger_ui()
 	_update_path_highlight()
-
-
-func _on_roll_button_pressed() -> void:
-	dice_roller.trigger_roll()
 
 
 ## Click a path to send the next drafted unit's march out that portal

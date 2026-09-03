@@ -10,9 +10,9 @@ const UNIT_TOKEN_SCENE := preload("res://scenes/unit_token.tscn")
 
 ## Radius of that same green felt circle, in the same viewport-local
 ## pixels as spawn_area. Everything that renders inside the tray (dice,
-## walls, the drafted-unit icon, the clash-result labels) sizes and
+## walls, the roll-result label, the clash-result labels) sizes and
 ## positions itself relative to this so nothing can render past the felt
-## and onto the wood border - see _build_tray_walls(), _show_unit_icon()
+## and onto the wood border - see _build_tray_walls(), _show_roll_result()
 ## and _show_clash_results() below.
 const FELT_RADIUS := 84.0
 
@@ -31,11 +31,18 @@ const QUANTITY_DICE_COUNT := 3
 ## small felt-bowl viewport no matter how many are thrown at once (1-6).
 ## Scale shrinks as count grows instead of using one fixed size, so a
 ## single die and a full six-dice throw both stay inside the circle.
-const DICE_SCALE_BASE := 0.22
-const DICE_SCALE_MIN := 0.06
+const DICE_SCALE_BASE := 0.28
+const DICE_SCALE_MIN := 0.08
 
 const MARCH_DURATION := 3.0  # seconds for a token to cross the whole track
 const MAX_UNITS_PER_DRAFT := 8  # keeps a single draft's march readable; tune freely
+
+## Seconds between each drafted unit's march start. UnitToken's icon renders
+## at ~0.4x a 256px source avatar (~100px wide - see unit_token.gd's
+## icon_scale), and the track covers ~445px in MARCH_DURATION seconds, so a
+## short stagger has consecutive tokens overlapping several deep instead of
+## reading as a line of units. This spacing keeps a full gap between them.
+const MARCH_STAGGER := 0.8
 
 const WAVE_COUNT := 5
 const MAX_VILLAGE_HP := 20
@@ -108,7 +115,7 @@ var active_dice: Array[Die] = []
 var active_result_icons: Array[CanvasItem] = []
 
 var type_dice: Array[Die] = []
-var unit_icon: Sprite2D = null
+var roll_result_label: Label = null
 var drafted_texture: Texture2D = null
 
 var awaiting_advance := false
@@ -171,9 +178,9 @@ func _enter_phase(new_phase: Phase) -> void:
 		Phase.TYPE:
 			_clear_result_icons()
 			_clear_type_dice()
-			if unit_icon:
-				unit_icon.queue_free()
-				unit_icon = null
+			if roll_result_label:
+				roll_result_label.queue_free()
+				roll_result_label = null
 		Phase.QUANTITY:
 			_spawn_dice(QUANTITY_DICE_COUNT, Die.NUMBER_ROW, true)
 		Phase.CLASH:
@@ -260,7 +267,7 @@ func _on_die_result_locked(value: int, rarity: int) -> void:
 				_enter_phase(Phase.QUANTITY)
 				return
 			drafted_texture = pool[randi() % pool.size()]
-			_show_unit_icon(drafted_texture)
+			_show_roll_result(total)
 			_enter_phase(Phase.QUANTITY)
 
 		Phase.QUANTITY:
@@ -335,17 +342,25 @@ func _placeholder_names(count: int) -> Array[String]:
 	return names
 
 
-func _show_unit_icon(texture: Texture2D) -> void:
-	if unit_icon:
-		unit_icon.queue_free()
-	unit_icon = Sprite2D.new()
-	unit_icon.texture = texture
-	# Source avatar art is 256x256 - shrink so the icon's diameter is well
-	# inside FELT_RADIUS even with the -15px vertical offset below, instead
-	# of straddling the felt's edge and overlapping the wood border.
-	unit_icon.scale = Vector2(0.3, 0.3)
-	unit_icon.position = spawn_area + Vector2(0, -15)
-	add_child(unit_icon)
+const ROLL_RESULT_LABEL_SIZE := Vector2(56, 36)
+
+## Shows the TYPE roll's 2d6 total as plain text near the top of the felt,
+## above where the QUANTITY dice land, instead of the old unit-avatar icon
+## (which sat right in the middle of the tray, overlapping the dice while
+## they rolled). Check the Roll Ledger for what a given total actually
+## drafts - see get_ledger_rows().
+func _show_roll_result(total: int) -> void:
+	if roll_result_label:
+		roll_result_label.queue_free()
+	roll_result_label = Label.new()
+	roll_result_label.text = str(total)
+	roll_result_label.add_theme_font_size_override("font_size", 28)
+	roll_result_label.size = ROLL_RESULT_LABEL_SIZE
+	roll_result_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	roll_result_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	var center := spawn_area + Vector2(0, -55)
+	roll_result_label.position = center - ROLL_RESULT_LABEL_SIZE / 2.0
+	add_child(roll_result_label)
 
 
 ## Sends every unit drafted this QUANTITY roll marching down the track,
@@ -361,7 +376,7 @@ func _spawn_drafted_units() -> void:
 		for i in count:
 			if spawned >= MAX_UNITS_PER_DRAFT:
 				return
-			_spawn_marching_token(drafted_texture, rarity, spawned * 0.15)
+			_spawn_marching_token(drafted_texture, rarity, spawned * MARCH_STAGGER)
 			spawned += 1
 
 
@@ -376,8 +391,16 @@ func _spawn_marching_token(texture: Texture2D, rarity: int, start_delay: float =
 		return
 	var follow := PathFollow2D.new()
 	follow.rotates = false
-	follow.progress_ratio = 0.0
+	# add_child() MUST come before touching progress_ratio - PathFollow2D
+	# needs its parent Path2D to already be in the tree to resolve a curve
+	# position at all, and setting the property on a freshly-.new()'d node
+	# (no parent yet) throws "Can only set progress ratio on a PathFollow2D
+	# that is the child of a Path2D which is itself part of the scene
+	# tree." This was always wrong, just never reached before track lookup
+	# was fixed - _get_march_track() used to return null and bail out here
+	# first every time.
 	track.add_child(follow)
+	follow.progress_ratio = 0.0
 
 	var token: UnitToken = UNIT_TOKEN_SCENE.instantiate()
 	follow.add_child(token)
