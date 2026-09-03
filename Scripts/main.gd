@@ -374,12 +374,20 @@ func _show_roll_result(total: int) -> void:
 ## Sends every unit drafted this QUANTITY roll marching down the track,
 ## one by one, tinted by whichever rarity die produced it. Total is capped
 ## at MAX_UNITS_PER_DRAFT so a lucky legendary-heavy roll doesn't flood the
-## track with dozens of overlapping tokens.
+## track with dozens of overlapping tokens. Rarest first: quantity_by_rarity
+## is keyed by whichever die happened to physically settle first, which has
+## nothing to do with rarity - iterating it in insertion order let an early
+## common/uncommon die's count fill the whole cap before a later rare/epic/
+## legendary die's count ever got a turn, silently discarding it. Spawning
+## highest rarity first means a rarer die's units are never dropped in
+## favor of a lesser one.
 func _spawn_drafted_units() -> void:
 	if drafted_texture == null:
 		return
 	var spawned := 0
-	for rarity in quantity_by_rarity.keys():
+	for rarity in range(Die.Rarity.LEGENDARY, Die.Rarity.COMMON - 1, -1):
+		if not quantity_by_rarity.has(rarity):
+			continue
 		var count: int = quantity_by_rarity[rarity]
 		for i in count:
 			if spawned >= MAX_UNITS_PER_DRAFT:
