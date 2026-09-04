@@ -3,6 +3,8 @@
 [ext_resource type="Texture2D" uid="uid://cdmvqh4qh7oj3" path="res://Tiny/Tiny Swords (Free Pack)/Terrain/Tileset/Tilemap_color2.png" id="1_0xiww"]
 [ext_resource type="PackedScene" uid="uid://dek5niyr8uw0t" path="res://scenes/battle_ui.tscn" id="1_1oqlt"]
 [ext_resource type="Texture2D" uid="uid://dlguyissrm3wi" path="res://Tiny/Tiny Swords (Free Pack)/Terrain/Tileset/Tilemap_color3.png" id="2_1oqlt"]
+[ext_resource type="Script" path="res://Scripts/village.gd" id="3_ledger"]
+[ext_resource type="Script" path="res://Scripts/village_camera_pan.gd" id="4_ledger"]
 
 [sub_resource type="NavigationPolygon" id="NavigationPolygon_mv8fa"]
 vertices = PackedVector2Array(32, -15.8046875, 32, 32, -20.320313, 32, -18.625, -16.367188)
@@ -430,6 +432,7 @@ sources/0 = SubResource("TileSetAtlasSource_my7oa")
 sources/1 = SubResource("TileSetAtlasSource_63aph")
 
 [node name="Village" type="Node2D" unique_id=1736676983]
+script = ExtResource("3_ledger")
 
 [node name="BattleUI" parent="." unique_id=1069348535 instance=ExtResource("1_1oqlt")]
 
@@ -437,6 +440,7 @@ sources/1 = SubResource("TileSetAtlasSource_63aph")
 groups=PackedStringArray("battle_world")
 
 [node name="WorldCamera" type="Camera2D" parent="Node2D" unique_id=2024000001]
+script = ExtResource("4_ledger")
 position = Vector2(1376, 1376)
 zoom = Vector2(0.22, 0.22)
 

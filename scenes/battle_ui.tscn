@@ -5,17 +5,6 @@
 [ext_resource type="Texture2D" uid="uid://da6fmagfdwbg8" path="res://ui/pathtrack.png" id="2_gvrrm"]
 [ext_resource type="Script" uid="uid://c1xf4cb625rsy" path="res://Scripts/main.gd" id="1_wvifm"]
 [ext_resource type="PackedScene" uid="uid://dg2y32dnikyfe" path="res://scenes/DiceCountSelector.tscn" id="2_lgetq"]
-[ext_resource type="Texture2D" uid="uid://jufsf8r17bnf" path="res://Tiny/Tiny Swords (Free Pack)/UI Elements/UI from the page/Enemy Avatars/Enemy Avatars_16.png" id="3_bw04g"]
-[ext_resource type="Texture2D" uid="uid://bhvgjojid5r0w" path="res://Tiny/Tiny Swords (Free Pack)/UI Elements/UI from the page/Enemy Avatars/Enemy Avatars_11.png" id="4_1m1i6"]
-[ext_resource type="Texture2D" uid="uid://clpu3r4fbgnxd" path="res://Tiny/Tiny Swords (Free Pack)/UI Elements/UI from the page/Enemy Avatars/Enemy Avatars_10.png" id="5_hnkxu"]
-[ext_resource type="Texture2D" uid="uid://b6anh3a41w57p" path="res://Tiny/Tiny Swords (Free Pack)/UI Elements/UI from the page/Enemy Avatars/Enemy Avatars_09.png" id="6_6jbvb"]
-[ext_resource type="Texture2D" uid="uid://cup1cdckjdbqk" path="res://Tiny/Tiny Swords (Free Pack)/UI Elements/UI from the page/Enemy Avatars/Enemy Avatars_06.png" id="7_y8ss2"]
-[ext_resource type="Texture2D" uid="uid://b8b6nhw00s25s" path="res://Tiny/Tiny Swords (Free Pack)/UI Elements/UI from the page/Enemy Avatars/Enemy Avatars_14.png" id="8_emian"]
-[ext_resource type="Texture2D" uid="uid://b7eghlrd713ki" path="res://Tiny/Tiny Swords (Free Pack)/UI Elements/UI from the page/Enemy Avatars/Enemy Avatars_01.png" id="9_k0kd0"]
-[ext_resource type="Texture2D" uid="uid://bscasvwfdhpoy" path="res://Tiny/Tiny Swords (Free Pack)/UI Elements/UI from the page/Enemy Avatars/Enemy Avatars_02.png" id="10_ms1mg"]
-[ext_resource type="Texture2D" uid="uid://7d40gpq0tink" path="res://Tiny/Tiny Swords (Free Pack)/UI Elements/UI from the page/Enemy Avatars/Enemy Avatars_04.png" id="11_wuh40"]
-[ext_resource type="Texture2D" uid="uid://q8ak2ptrsqn0" path="res://Tiny/Tiny Swords (Free Pack)/UI Elements/UI from the page/Enemy Avatars/Enemy Avatars_03.png" id="12_eo00v"]
-[ext_resource type="Texture2D" uid="uid://lufjimts3tur" path="res://Tiny/Tiny Swords (Free Pack)/UI Elements/UI from the page/Enemy Avatars/Enemy Avatars_12.png" id="13_3a1b4"]
 
 [sub_resource type="Curve2D" id="Curve2D_left"]
 _data = {
@@ -95,9 +84,6 @@ render_target_update_mode = 4
 
 [node name="DiceRoller" type="Node2D" parent="UIRoot/TrayAnchor/DiceRollerContainer/DiceRollerViewport"]
 script = ExtResource("1_wvifm")
-boss_icon = ExtResource("3_bw04g")
-rare_icons = Array[Texture2D]([ExtResource("4_1m1i6"), ExtResource("5_hnkxu"), ExtResource("6_6jbvb"), ExtResource("7_y8ss2"), ExtResource("8_emian")])
-common_icons = Array[Texture2D]([ExtResource("9_k0kd0"), ExtResource("10_ms1mg"), ExtResource("11_wuh40"), ExtResource("12_eo00v"), ExtResource("13_3a1b4")])
 
 [node name="DiceCountSelector" parent="UIRoot/TrayAnchor/DiceRollerContainer/DiceRollerViewport/DiceRoller" instance=ExtResource("2_lgetq")]
 

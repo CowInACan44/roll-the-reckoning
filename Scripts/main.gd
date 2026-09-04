@@ -40,18 +40,6 @@ const DEFENDER_WIN_HEAL := 1  # village HP recovered per lane the defenders win
 
 enum Phase { TYPE, QUANTITY, CLASH }
 
-@export var boss_icon: Texture2D
-@export var rare_icons: Array[Texture2D] = []
-@export var common_icons: Array[Texture2D] = []
-
-const SUM_TO_RANGE := {
-	2: "boss",
-	3: "rare", 4: "rare",
-	5: "common", 6: "common", 7: "common", 8: "common", 9: "common",
-	10: "rare", 11: "rare",
-	12: "rare",
-}
-
 const ICON_NAMES := ["Heart", "Skull", "Fist", "Sword", "Shield", "Swirl"]
 const RARITY_NAMES := ["Common", "Uncommon", "Rare", "Epic", "Legendary"]
 const RARITY_COLORS := [
@@ -83,6 +71,12 @@ var awaiting_advance := false
 var wave := 1
 var village_hp := MAX_VILLAGE_HP
 var run_over := false
+
+## Gates rolling until the pre-siege ledger/planning phase is done - see
+## battle_ui.gd's set_battle_active(), which flips this when the player
+## hits "Start Siege". Without this, the TYPE phase's "click anywhere to
+## roll" input handler would fire while the player is just panning the map.
+var battle_started := false
 
 ## Which portal the next draft marches out of - "left" or "right". Set by
 ## the player clicking a path in battle_ui.gd (PathLeftButton/PathRightButton).
@@ -167,7 +161,7 @@ func _clear_result_icons() -> void:
 
 
 func _input(event: InputEvent) -> void:
-	if run_over:
+	if run_over or not battle_started:
 		return
 	if not (event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT):
 		return
@@ -226,7 +220,7 @@ func _on_die_result_locked(value: int, rarity: int) -> void:
 			var total := 0
 			for v in rolled_values:
 				total += v
-			var range_key: String = SUM_TO_RANGE.get(total, "common")
+			var range_key: String = Ledger.SUM_TO_RANGE.get(total, "common")
 			var pool: Array[Texture2D] = _pool_for_range(range_key)
 			if pool.is_empty():
 				_enter_phase(Phase.QUANTITY)
@@ -252,17 +246,15 @@ func _on_die_result_locked(value: int, rarity: int) -> void:
 				awaiting_advance = true
 
 
+## Draws only from the units the player slotted into the ledger for this
+## tier - see Ledger.entries_for_tier(). A tier with nothing slotted comes
+## back empty, and the caller already treats an empty pool as "no unit
+## drafted this roll".
 func _pool_for_range(range_key: String) -> Array[Texture2D]:
-	match range_key:
-		"boss":
-			var boss_pool: Array[Texture2D] = []
-			if boss_icon:
-				boss_pool.append(boss_icon)
-			return boss_pool
-		"rare":
-			return rare_icons
-		_:
-			return common_icons
+	var pool: Array[Texture2D] = []
+	for entry in Ledger.entries_for_tier(range_key):
+		pool.append(entry.icon)
+	return pool
 
 
 func _show_unit_icon(texture: Texture2D) -> void:
@@ -309,6 +301,7 @@ func _spawn_marching_token(texture: Texture2D, rarity: int, start_delay: float =
 	follow.add_child(token)
 	token.set_icon_texture(texture)
 	token.modulate = RARITY_COLORS[rarity]
+	token.facing_right = (march_side == "right")
 
 	var tween := create_tween()
 	tween.tween_interval(start_delay)
@@ -422,7 +415,7 @@ func _update_hud() -> void:
 
 
 func trigger_roll() -> void:
-	if run_over:
+	if run_over or not battle_started:
 		return
 	if awaiting_advance:
 		awaiting_advance = false
